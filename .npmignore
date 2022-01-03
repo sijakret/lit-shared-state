@@ -1,0 +1,11 @@
+doc/*
+*.config.js
+.vscode
+tsconfig.json
+test/**
+coverage
+*.tgz
+.github
+.prettierrc
+src
+examples

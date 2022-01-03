@@ -1,0 +1,107 @@
+
+a,
+a:visited {
+color: #e53e3e;
+}
+h1 {
+padding-top: 40px;
+color: #e53e3e;
+}
+body,
+html {
+margin: 0px;
+width: 100%;
+display: flex;
+flex: 1 1;
+flex-direction: row;
+max-height: 100%;
+font-family: Arial, Helvetica, sans-serif;
+background:#6e6e6e;
+}
+my-doc {
+flex: 1 1;
+margin: auto;
+max-width: 768px;
+width: 100%;
+}
+my-nav {
+    overflow:scroll;
+padding-top: 100px;
+padding-bottom: 20px;
+background: #e53e3e;
+width: 200px;
+max-width: 200px;
+height: calc(100% - 120px);
+border-right: 1px solid rgba(0, 0, 0, 0.1);
+display: flex;
+flex-direction: column;
+-webkit-box-shadow: 2px 0px 5px 0px rgba(0, 0, 0, 0.55);
+-moz-box-shadow: 2px 0px 5px 0px rgba(0, 0, 0, 0.55);
+box-shadow: 2px 0px 5px 0px rgba(0, 0, 0, 0.55);
+}
+my-nav > * {
+text-decoration: none;
+padding: 14px;
+}
+my-nav a,
+my-nav a:visited {
+color: #ffffff;
+text-decoration: none;
+}
+my-nav a:hover {
+background: rgba(255, 255, 255, 0.1);
+}
+[content] {
+padding-top: 20px;
+display: flex;
+overflow: auto;
+height: calc(100% - 20px);
+width: calc(100% - 40px);
+}
+section {
+padding-top: 20px;
+padding-bottom: 20px;
+}
+[github] {
+    position: fixed;
+    right: 32px;
+    top: 32px;
+    fill: #eeeeee;
+}
+[nav-header] {
+    background: #e53e3e;
+    white-space: nowrap;
+    position: fixed;
+    top: 32px;
+    font-weight: 100;
+    font-size: 39px;
+    text-shadow: 2px 2px rgba(0, 0, 0, 0.37);
+    color: #f9f9f9;
+}
+
+@media (max-width: 1200px){
+    /* CSS stuff */
+    [nav-header] {
+        white-space:initial;
+        position: relative;
+    }
+    my-nav {
+        padding-top: 20px;
+        height: calc(100% - 40px);
+    }
+}
+
+playground-ide,
+playground-file-editor {
+--playground-border: rgba(0, 0, 0, 0);
+--playground-code-gutter-background: #1f1f1f;
+--playground-code-background: #000000;
+--playground-code-linenumber-color: #a3a3a3;
+--playground-highlight-color: #e53e3e;
+--playground-tab-bar-background: #1f1f1f;
+--playground-tab-bar-foreground-color: #ffffff;
+--playground-preview-toolbar-background: #000000;
+--playground-preview-toolbar-foreground-color: #f0f0f0;
+border-radius: 9px;
+width: 100%;
+}

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>lit-shared-state todo sample</title>
+
+    <!-- Your application must load the Roboto and Material Icons fonts. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Material+Icons&display=block"
+      rel="stylesheet"
+    />
+    <style>
+      body,
+      html {
+        height: 100%;
+      }
+      body {
+        display: flex;
+      }
+      todo-list {
+        height: calc(100% - 60px);
+        padding: 30px;
+        flex: 1 0;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="module" src="src/index.ts"></script>
+    <todo-list>Todo list 1</todo-list>
+    <todo-list>Todo list 2</todo-list>
+  </body>
+</html>

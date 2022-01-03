@@ -1,0 +1,25 @@
+{
+  "name": "app-todo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "web-dev-server --config web-dev-server.config.js"
+  },
+  "author": {
+    "email": "sijakret@gmail.com",
+    "name:": "Jan Kretschmer",
+    "url": "https://github.com/sijakret"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@material/mwc-button": "^0.25.3",
+    "@material/mwc-list": "^0.25.3",
+    "@material/mwc-textfield": "^0.25.3",
+    "@web/dev-server": "^0.1.29",
+    "@web/dev-server-esbuild": "^0.2.16",
+    "lit": "^2.1.0",
+    "lit-shared-state": "0.0.5"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "importHelpers": true,
+    "inlineSources": true,
+    "target": "es2017",
+    "moduleResolution": "node",
+    "lib": ["esnext.array", "esnext", "dom"],
+    "strict": true,
+    "noUnusedLocals": true,
+    "esModuleInterop": true,
+    "declaration": true,
+    "sourceMap": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": false,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "outDir": "./dist/",
+    "experimentalDecorators": true,
+    "baseUrl": "src"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}

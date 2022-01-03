@@ -1,0 +1,41 @@
+{
+  "name": "lit-shared-state",
+  "version": "0.0.5",
+  "description": "Reactive shared state management for LitElement",
+  "main": "dist/lit-shared-state.js",
+  "module": "dist/lit-shared-state.js",
+  "type": "module",
+  "typings": "dist/lit-shared-state.d.ts",
+  "scripts": {
+    "test": "wtr --config web-test-runner.config.js test/**/*.test.ts --node-resolve --coverage",
+    "build": "tsc && esbuild dist/lit-shared-state.js --minify --sourcemap --outfile=dist/lit-shared-state.min.js",
+    "doc:build": "typedoc src/lit-shared-state.ts --out doc/api&&npx rimraf doc/dist&&npx copyfiles src/lit-shared-state.ts doc --flat&&cd doc &&rollup --config rollup.config.build.js",
+    "doc:serve": "npx copyfiles src/lit-shared-state.ts doc --flat&&cd doc/&&rollup --config rollup.config.dev.js --watch",
+    "gzipped-size": "gzip -c dist/lit-shared-state.min.js | wc -c"
+  },
+  "author": "Jan Kretschmer",
+  "license": "MIT",
+  "peerDependencies": {
+    "lit": "^2.0.2"
+  },
+  "devDependencies": {
+    "@esm-bundle/chai": "^4.3.4-fix.0",
+    "@jackfranklin/rollup-plugin-markdown": "^0.3.0",
+    "@open-wc/testing": "^3.0.3",
+    "@rollup/plugin-node-resolve": "^13.1.2",
+    "@web/dev-server": "^0.1.29",
+    "@web/dev-server-esbuild": "^0.2.16",
+    "@web/rollup-plugin-html": "^1.10.1",
+    "@web/rollup-plugin-import-meta-assets": "^1.0.7",
+    "@web/test-runner": "^0.13.23",
+    "highlight.js": "^11.3.1",
+    "playground-elements": "^0.14.7",
+    "rollup-plugin-copy": "^3.4.0",
+    "rollup-plugin-esbuild": "^4.8.2",
+    "rollup-plugin-serve": "^1.1.0",
+    "showdown-highlight": "^2.1.8",
+    "tslib": "^2.3.1",
+    "typedoc": "^0.22.10",
+    "typescript": "^4.5.4"
+  }
+}
