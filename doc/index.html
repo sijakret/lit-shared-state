@@ -33,8 +33,9 @@
 
         import start from './samples/Getting Started.md';
         import basic from './samples/Basic Usage.md';
-        import storage from './samples/Custom Storage.md';
+        import gotchas from './samples/Gotchas.md';
         import locks from './samples/Locked State.md';
+        import storage from './samples/Custom Storage.md';
         import observers from './samples/Observing State.md';
         import logging from './samples/Logging.md';
         import all from './samples/Putting it all together.md';
@@ -42,10 +43,11 @@
         const chapters = [
           start,
           basic,
-          storage,
-          locks,
-          logging,
+          gotchas,
           observers,
+          locks,
+          storage,
+          logging,
           all,
         ].map((item) => ({
           ...item,
@@ -97,11 +99,16 @@
                 <div version>${__VERSION__}</div>
               </div>
               <br /><br />
-              ${chapters.map(
-                ({ name, hash }, i) => html`<a href="#${hash}">${name}</a>`
-              )}
-              <br /><br />
-              <a href="./api/">API</a>`;
+              <ol type="I">
+                ${chapters.map(
+                  ({ name, hash }, i) =>
+                    html`<li><a href="#${hash}">${name}</a></li>`
+                )}
+              </ol>
+              <br />
+              <ul>
+                <a href="./api/">API</a>
+              </ul>`;
           }
         }
         customElements.define('my-nav', Nav);

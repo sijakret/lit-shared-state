@@ -18,13 +18,18 @@ max-height: 100%;
 font-family: Arial, Helvetica, sans-serif;
 background:#6e6e6e;
 }
+
 my-doc {
 flex: 1 1;
 margin: auto;
 max-width: 768px;
 width: 100%;
 }
-my-nav {
+my-nav ul {
+    list-style: none;
+}
+my-nav  {
+    color: #ffffff;
     overflow:scroll;
 padding-top: 100px;
 padding-bottom: 20px;
@@ -39,12 +44,12 @@ flex-direction: column;
 -moz-box-shadow: 2px 0px 5px 0px rgba(0, 0, 0, 0.55);
 box-shadow: 2px 0px 5px 0px rgba(0, 0, 0, 0.55);
 }
-my-nav > * {
+my-nav li , [nav-header] > * {
 text-decoration: none;
-padding: 14px;
+padding: 8px;
 }
 my-nav a,
-my-nav a:visited {
+my-nav a:visited, my-nav li::before {
 color: #ffffff;
 text-decoration: none;
 }

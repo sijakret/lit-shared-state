@@ -9,8 +9,8 @@
   "scripts": {
     "test": "wtr --config web-test-runner.config.js test/**/*.test.ts --node-resolve --coverage",
     "build": "tsc && esbuild dist/lit-shared-state.js --minify --sourcemap --outfile=dist/lit-shared-state.min.js",
-    "doc:build": "typedoc src/lit-shared-state.ts --out doc/api&&npx rimraf doc/dist&&npx copyfiles src/lit-shared-state.ts doc --flat&&cd doc &&rollup --config rollup.config.build.js",
-    "doc:serve": "npx copyfiles src/lit-shared-state.ts doc --flat&&cd doc/&&rollup --config rollup.config.dev.js --watch",
+    "doc:build": "typedoc src/lit-shared-state.ts --out doc/api&&npx rimraf doc/dist&&npx copyfiles src/lit-shared-state.ts doc --flat&&rollup --config doc/rollup.config.build.js",
+    "doc:serve": "npx copyfiles src/lit-shared-state.ts doc --flat&&rollup --config doc/rollup.config.dev.js --watch",
     "gzipped-size": "gzip -c dist/lit-shared-state.min.js | wc -c"
   },
   "author": "Jan Kretschmer",

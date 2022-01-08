@@ -1,3 +1,5 @@
 *.js
 api
 lit-shared-state.ts
+!rollup.config.build.js
+!rollup.config.dev.js

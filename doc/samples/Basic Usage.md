@@ -20,28 +20,6 @@ In addition, there is a global interval that continuously modifies the state.
 <code-sample folder="samples/basic-js" style="height: 600px;"> </code-sample>
 </details> -->
 
-### Relevant APIs
+#### Relevant APIs
 * [state](api/modules.html#state) - decorator to define and use state
 * [use](api/modules.html#use) - decorator to define and use state
-
-
-### Gotchas
-
-Due to the way typescript and our decorators work you need to make sure
-* all properties are initialized
-* uninitialized properties need to be annoated with ```@keep()```
-
-```ts
-class State {
-    // Wrong: if you assign this later it will throw an error
-    field?:number;
-
-    // Correct:
-    // we have a special decorator for optional properties
-    @keep() field?:number;
-
-    // Correct:
-    // this pattern is also possible
-    field:number | undefined = undefined;
-}
-```

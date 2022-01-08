@@ -21,7 +21,7 @@ It provides a set of straight forward decorators to make your (nested) state (de
 Take a lookt at section [Putting-it-all-together](#Putting-it-all-together) for an example on how to do this.
 
 
-### Relevant APIs
+#### Relevant APIs
 * [StateOptions?.init](api/interfaces/StateOptions.html#init) - must return initial value
 * [StateOptions?.store](api/interfaces/StateOptions.html#store) - must store given value
 * [StateOptions?.load](api/interfaces/StateOptions.html#load) - must return current value

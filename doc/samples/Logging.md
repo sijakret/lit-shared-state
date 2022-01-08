@@ -13,5 +13,5 @@ class State {
 }
 ```
 
-### Relevant APIs
+#### Relevant APIs
 * [log](api/modules.html#log) - get/set - customization for logging

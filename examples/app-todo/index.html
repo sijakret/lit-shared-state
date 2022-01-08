@@ -23,18 +23,38 @@
       }
       body {
         display: flex;
+        flex-direction: column;
       }
       todo-list {
-        height: calc(100% - 100px);
         padding: 16px;
         margin: 16px;
         flex: 1 0;
+      }
+      [info] {
+        flex: 0 1;
+        height: 0%;
+        width: 100%;
+        padding: 16px;
+        margin: 16px;
+      }
+      [todos] {
+        flex: 1 0;
+        display: flex;
+        flex-direction: row;
       }
     </style>
   </head>
   <body>
     <script type="module" src="src/todo-list-component.ts"></script>
-    <todo-list>Todos 1</todo-list>
-    <todo-list>Todos 2</todo-list>
+
+    <div info>
+      Both todo lists share the same state. Both are interactive.<br />
+      ALL state is serialized in localStorage, including unfinished todos,
+      selection etc..
+    </div>
+    <div todos>
+      <todo-list>Todos 1</todo-list>
+      <todo-list>Todos 2</todo-list>
+    </div>
   </body>
 </html>
