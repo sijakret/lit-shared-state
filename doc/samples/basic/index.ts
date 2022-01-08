@@ -1,12 +1,12 @@
 import { LitElement, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { state } from 'lit-shared-state';
+import { use } from 'lit-shared-state';
 import { mySharedState } from './my-state.js';
 
 @customElement('comp-a')
 class CompA extends LitElement {
   // one line to pull in a slice of global state
-  @state state = mySharedState;
+  @use() state = mySharedState;
   click() {
     this.state.count--;
   }
@@ -20,7 +20,7 @@ class CompA extends LitElement {
 @customElement('comp-b')
 class CompB extends LitElement {
   // state can be used in multiple components
-  @state state = mySharedState;
+  @use() state = mySharedState;
   render() {
     return html` I'm in sync<slot></slot>: ${this.state.count} `;
   }

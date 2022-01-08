@@ -7,16 +7,14 @@ import '@material/mwc-textfield';
 import '@material/mwc-list/mwc-list.js';
 import '@material/mwc-list/mwc-check-list-item.js';
 import { SelectedDetail } from '@material/mwc-list/mwc-list.js';
+import { use } from 'lit-shared-state';
 
 @customElement('todo-list')
 export class TodoList extends LitElement {
-  @state() todos = todolistState;
+  @use() todos = todolistState;
 
   edit({ target }: { target: { value: string } }) {
-    todoListActions.editCurrentTodo({
-      task: target.value,
-      selected: false,
-    });
+    todoListActions.editCurrentTodo(new Todo(target.value));
   }
 
   add() {
@@ -43,11 +41,19 @@ export class TodoList extends LitElement {
       :host {
         display: flex;
         flex-direction: column;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        -webkit-box-shadow: 0px 10px 13px -7px #000000,
+          5px 5px 15px 5px rgba(0, 0, 0, 0);
+        box-shadow: 0px 10px 13px -7px #000000,
+          5px 5px 15px 5px rgba(0, 0, 0, 0);
       }
       .add {
         display: flex;
         flex-direction: row;
         align-items: center;
+        text-align: center;
+        padding-bottom: 16px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.09);
       }
       mwc-textfield {
         margin-right: 20px;
@@ -81,8 +87,8 @@ export class TodoList extends LitElement {
                 label="add"
               ></mwc-button>`
           : html`
-              <div style="flex: 1 0"></div>
               <mwc-button
+                style="margin-left: auto; margin-right: auto"
                 raised
                 trailingIcon
                 icon="delete"
@@ -97,9 +103,9 @@ export class TodoList extends LitElement {
           @selected=${({ detail }: { detail: SelectedDetail<Set<number>> }) =>
             this.select(detail)}
         >
-          ${this.todos.todos?.map((todo) => {
+          ${this.todos.todos?.map((todo, index) => {
             return html`<mwc-check-list-item ?selected=${todo.selected}
-              >${todo.task}</mwc-check-list-item
+              >${index + 1}. ${todo.task}</mwc-check-list-item
             >`;
           })}
         </mwc-list>

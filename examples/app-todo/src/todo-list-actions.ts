@@ -1,7 +1,7 @@
-import { Todo, unlockState, todolistState } from './todo-list-state';
+import { Todo, unlock, todolistState } from './todo-list-state';
 
 class TodoListActions {
-  @unlockState
+  @unlock()
   commitCurrentTodo() {
     if (todolistState.currentTodo) {
       todolistState.todos = [...todolistState.todos, todolistState.currentTodo];
@@ -9,22 +9,20 @@ class TodoListActions {
     }
   }
 
-  @unlockState
+  @unlock()
   editCurrentTodo(todo: Todo) {
     todolistState.currentTodo = todo;
   }
 
-  @unlockState
+  @unlock()
   setSelected(todo: Todo, selected = true) {
-    if (!todo) {
+    if (todo) {
       // select event is apparently emitted when items are removed
-      return;
+      todo.selected = selected;
     }
-    todo.selected = selected;
-    todolistState.todos = [...todolistState.todos];
   }
 
-  @unlockState
+  @unlock()
   deleteSelected() {
     todolistState.todos = todolistState.todos.filter((todo) => !todo.selected);
   }

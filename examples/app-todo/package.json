@@ -19,7 +19,9 @@
     "@material/mwc-textfield": "^0.25.3",
     "@web/dev-server": "^0.1.29",
     "@web/dev-server-esbuild": "^0.2.16",
+    "class-transformer": "^0.5.1",
     "lit": "^2.1.0",
+    "reflect-metadata": "^0.1.13",
     "lit-shared-state": "0.0.5"
   }
 }

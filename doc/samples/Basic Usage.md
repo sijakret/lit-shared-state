@@ -5,7 +5,7 @@ This sample illustrates how to..
 * manipulate state from global scope
 
 Literally the only thing you need to do to make state shared and reactive is
-to use the `@state` decorator when you declare state fields and when you pull state fields in
+to use the ```@state``` decorator when you declare state classes and when ```@use``` you pull state in
 a LitElement.
 How can it get any easier than that? :)
 
@@ -22,4 +22,26 @@ In addition, there is a global interval that continuously modifies the state.
 
 ### Relevant APIs
 * [state](api/modules.html#state) - decorator to define and use state
+* [use](api/modules.html#use) - decorator to define and use state
 
+
+### Gotchas
+
+Due to the way typescript and our decorators work you need to make sure
+* all properties are initialized
+* uninitialized properties need to be annoated with ```@keep()```
+
+```ts
+class State {
+    // Wrong: if you assign this later it will throw an error
+    field?:number;
+
+    // Correct:
+    // we have a special decorator for optional properties
+    @keep() field?:number;
+
+    // Correct:
+    // this pattern is also possible
+    field:number | undefined = undefined;
+}
+```

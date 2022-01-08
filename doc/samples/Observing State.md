@@ -9,9 +9,10 @@ function observer<T>({value}:StateVar<T>) {
     console.log('new value:', value);
 }
 
+@state({ observers: [observer] })
 class State {
     // observer will aready be invoked for initial set
-    @state({ observers: [observer] }) myNumber: number = 1;
+     myNumber: number = 1;
 }
 ```
 > **Note:** patterns like this are typically not needed!
@@ -20,4 +21,4 @@ class State {
 
 
 ### Relevant APIs
-* [StateOptions](api/interfaces/StateOptions.html#observers) - load/store - customization for logging
+* [StateOptions](api/interfaces/StateOptions.html#observers) - get/set - customization for logging

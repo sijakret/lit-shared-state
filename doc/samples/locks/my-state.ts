@@ -1,12 +1,18 @@
-import { lockedState, unlockState } from 'lit-shared-state';
+import { locked } from 'lit-shared-state';
 
+// locked returns a set of decorators that are connected
+// state defined by @state can unly be writen by using @unlock
+export const { state, unlock } = locked();
+// you could create a separate set of decorators like this:
+// const { state: otherState, unlock: otherUnlock} = locked();
+
+@state()
 class State {
-  // @lockedState only expects one initial assignment
-  @lockedState count: number = 1;
+  count: number = 1;
 
   // unlockState can be used as a decorator
   // NOT restricted to the class where state is defined
-  @unlockState
+  @unlock
   decrement() {
     this.count--;
   }
@@ -17,7 +23,7 @@ export const mySharedState = new State();
 // to an unlock function like below
 export const actions = {
   increment: () => {
-    unlockState(() => {
+    unlock(() => {
       // this context is allowed to manipulate state
       mySharedState.count++;
     });

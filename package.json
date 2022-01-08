@@ -1,6 +1,6 @@
 {
   "name": "lit-shared-state",
-  "version": "0.0.5",
+  "version": "0.0.8",
   "description": "Reactive shared state management for LitElement",
   "main": "dist/lit-shared-state.js",
   "module": "dist/lit-shared-state.js",
@@ -23,6 +23,7 @@
     "@jackfranklin/rollup-plugin-markdown": "^0.3.0",
     "@open-wc/testing": "^3.0.3",
     "@rollup/plugin-node-resolve": "^13.1.2",
+    "@rollup/plugin-replace": "^3.0.1",
     "@web/dev-server": "^0.1.29",
     "@web/dev-server-esbuild": "^0.2.16",
     "@web/rollup-plugin-html": "^1.10.1",

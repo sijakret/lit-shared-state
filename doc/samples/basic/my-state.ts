@@ -1,8 +1,10 @@
 import { state } from 'lit-shared-state';
+
+@state()
 class State {
   // one line to declare anything as state
   // all LitElements that use it will stay in sync.
-  @state count: number = 1;
+  count: number = 1;
 }
 export const mySharedState = new State();
 

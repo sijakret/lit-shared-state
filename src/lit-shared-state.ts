@@ -1,137 +1,373 @@
-import { LitElement, ReactiveController, ReactiveControllerHost } from 'lit';
+import { ReactiveController, ReactiveControllerHost } from 'lit';
 
 /**
  * Options for creating a state object
+ * apply for all properties in a state via @state(options)
+ * or for individual properties via @options(options) decorator
  */
-export interface StateOptions<T = unknown> {
+export interface StateOptions<T = any> {
   /**
-   * override logic to store state
+   * overrides logic to store state
+   * runs everytime stateVar is asigned a new value.
+   * method is allowed to set stateVar.value
+   * IMPORTANT: if you do NOT set stateVar.value you need to call
+   * stteVar.notifyObservers() to indicate data has updated
    */
-  store?: (stateVar: StateVar<T>, value: T | undefined) => void;
+  set?: (stateVar: StateVar<T>, value: T | undefined) => void;
   /**
-   * override logic to load state
+   * overrides logic to load state
+   * runs everytime stateVar is ready anywhere
+   * method needs to return current value!
    */
-  load?: (stateVar: StateVar<T>) => T | undefined;
+  get?: (stateVar: ReadonlyStateVar<T>) => T | undefined;
   /**
-   * override logic to initialize state
+   * overrides logic to initialize state
+   * method needs to return initial value value!
    * @param value: default initialization value
    */
-  init?: ((stateVar: StateVar<T>, value?: T) => T | undefined) | null;
+  init?: ((stateVar: ReadonlyStateVar<T>, value?: T) => T | undefined) | null;
   /**
    * all observers will be called everytime the value of state var changes
    */
-  observers?: ((stateVar: StateVar<T>) => void)[];
+  observers?: ((stateVar: ReadonlyStateVar<T>) => void)[];
+  /**
+   * if true observers will already be notified on init
+   */
+  notifyOnInit?: boolean;
   /**
    * used internally to provide a lock for avariable
    */
   lock?: Lock | null;
   /**
-   * used internally for @lockedEmptyState decorators
+   * if true state objects will not be sealed automatically
    */
-  empty?: boolean;
+  noSeal?: boolean;
 }
 
-type Lock = ((callback: () => any) => any) & { symbol: Symbol };
+export function state<T extends { new (...args: any[]): any }>(
+  stateOptions?: StateOptions
+) {
+  return function (constructor: T) {
+    return class extends constructor {
+      constructor(...args: any[]) {
+        super(...args);
+        __parents.set(this, []);
+        Object.keys(this).forEach((propKey) => {
+          const desc = Object.getOwnPropertyDescriptor(this, propKey);
+          if (desc?.writable) {
+            defineState(constructor, this, propKey, stateOptions, desc.value);
+          }
+        });
+        const optional = __optionals.get(constructor.prototype);
+        if (optional) {
+          for (const propKey of optional) {
+            defineState(constructor, this, propKey, stateOptions);
+          }
+        }
+        // make sure no new properties are added
+        !stateOptions?.noSeal && Object.seal(this);
+      }
+    };
+  };
+}
+
+/**
+ * helper to update parent/child relationships iof state vars
+ */
+function updateAncestory<T>(stateVar: StateVar<T>, value: T, propKey: string) {
+  if (stateVar.value instanceof Object && __parents.has(stateVar.value)) {
+    // remove parent
+    __parents.set(
+      stateVar.value,
+      (__parents.get(stateVar.value) as Ancestor[]).filter(
+        ({ parent }) => parent != stateVar
+      )
+    );
+  }
+  if (value instanceof Object && __parents.has(value)) {
+    __parents.get(value)?.push({ parent: stateVar as StateVar, propKey });
+  }
+  if (value instanceof Array) {
+    for (const v of value) {
+      if (v instanceof Object && __parents.has(v)) {
+        __parents.get(v)?.push({ parent: stateVar as StateVar, propKey });
+      }
+    }
+  }
+}
+
+/**
+ * helper to define state properties
+ */
+function defineState<T>(
+  constructor: any,
+  object: any,
+  propKey: string,
+  stateOptions?: StateOptions,
+  value?: T
+) {
+  const options = defaultOptions(
+    chainOptions(constructor, propKey, stateOptions)
+  );
+  const stateVar = new StateVar(object, propKey, options, value);
+  // ancestory tracking
+  updateAncestory(stateVar, value, propKey);
+
+  // derfine prop
+  Object.defineProperty(object, propKey, {
+    enumerable: true,
+    set(value: any) {
+      if (stateVar.options.lock && stateVar.options.lock.symbol !== __lock) {
+        throw new AccessError(stateVar.key);
+      }
+      // ancestory tracking
+      updateAncestory(stateVar, value, propKey);
+      stateVar.options.set(stateVar, value);
+    },
+    get() {
+      __currentController && stateVar.observers.add(__currentController);
+      return stateVar?.options.get(stateVar);
+    },
+  });
+}
+
+/**
+ * instance of a tracked state field
+ */
+export class StateVar<T = unknown> {
+  public observers = new Set<StateController>();
+
+  constructor(
+    public parent: Object,
+    public key: string,
+    public options: Required<StateOptions<T>>,
+    public _value?: T
+  ) {
+    if (this.options.init) {
+      this._value = this.options.init(this, _value);
+      options.notifyOnInit && this.notifyObservers();
+    }
+  }
+
+  get value(): T | undefined {
+    return this._value;
+  }
+  set value(value: T | undefined) {
+    this._value = value;
+    this.notifyObservers();
+  }
+
+  /**
+   * notifies all LitElement observers and all explicitly passed observers
+   */
+  notifyObservers() {
+    // litElements
+    for (const observer of this.observers.keys()) {
+      observer.update();
+    }
+    // custo observers
+    for (const observer of this.options.observers) {
+      observer(this);
+    }
+    // parent states
+    const parents = __parents.get(this.parent) as Ancestor[];
+    for (const { parent } of parents) {
+      parent.notifyObservers();
+    }
+  }
+}
+
+export abstract class ReadonlyStateVar<T = unknown> extends StateVar<T> {
+  public abstract get value(): T | undefined;
+  protected abstract set value(_value: T | undefined);
+}
+
+/**
+ * helper to create default options
+ */
+function defaultOptions({
+  observers = [],
+  notifyOnInit = false,
+  noSeal = false,
+  lock = null,
+  init = function init<V>(_stateVar: ReadonlyStateVar<V>, v: V) {
+    return v;
+  },
+  set = function set<V>(stateVar: StateVar<V>, v: V) {
+    if (stateVar.value !== v) {
+      stateVar.value = v;
+    }
+  },
+  get = function get<V>(stateVar: ReadonlyStateVar<V>) {
+    return stateVar.value;
+  },
+}: StateOptions = {}): Required<StateOptions> {
+  return { lock, set, get, init, observers, notifyOnInit, noSeal };
+}
+
+/**
+ * Class Decorator
+ * Used to pull state into a LitElement
+ *
+ * ```typescript
+ * @state()
+ * class MyState {
+ *   count = 1
+ *   // ..
+ * }
+ * const myState = new MyState()
+ * // ..
+ * class Component extends LitElement {
+ *    @use state = myState;
+ *    // ..
+ *    render() { return html`${this.state.count}` }
+ * }
+ * ```
+ */
+export function use() {
+  return function (_target: Object, propertyKey: string): any {
+    const symbol = Symbol(propertyKey);
+    const controllerSymbol = Symbol(propertyKey);
+    return {
+      set: function (state: any) {
+        this[controllerSymbol] = new StateController(
+          this as unknown as ReactiveControllerHost
+        );
+        this[symbol] = state;
+      },
+      get: function () {
+        // when we access a statevar through controller
+        // we set it as the current one
+        __currentController = this[controllerSymbol];
+        const state = this[symbol];
+        return state;
+      },
+    };
+  };
+}
 
 /**
  * Property Decorator
- * Used to declare state variables in state Objects
- * and to use them in LitElement components
+ * optional state properties need to be annotated with this for proper tracking
  *
  * ```typescript
- * class State {
- *   @ state field = 'value';
+ * @state()
+ * class MyState {
+ *   @keep() count?:number; // <- @keep() is important here
+ *   otherCount:number = 1; // @keep() is not needed here
  * }
- * const myState = new State();
+ * ```
+ */
+export function keep() {
+  return function (target: Object, propKey: string): void {
+    const set = __optionals.get(target) || new Set<string>();
+    set.add(propKey);
+    __optionals.set(target, set);
+  };
+}
+const __optionals = new WeakMap<Object, Set<string>>();
+
+/**
+ * Property Decorator
+ * Applies options per field
+ * @param options custom options for per state field
  *
- * //..
- * class Comp extends LitElement{
- *   @ state state = myState;
+ * ```typescript
+ * const options = {
+ *   notifyOnInit: true
+ *   // ..
+ * }
+ * @state(options) // inherited by all state vars
+ * class MyState {
+ *   // overrides options from @state(..)
+ *   @options({ notifyOnInit: false}) count = 1
+ *   // ..
+ * }
+ * ```
+ */
+export function options(options: StateOptions) {
+  return function (target: Object, propKey: string): void {
+    chainOptions(target.constructor, propKey, {}, options);
+  };
+}
+
+/**
+ * Generator function
+ * Generates a isolated set of decorators (state, options, unlock).
+ * State defined with @state() can only be modified using @unlock()
  *
- *   render() {
- *     //use this.state.field..
+ * ```typescript
+ * const {state,unlock} = locked();
+ *
+ * @state() // inherited by all state vars
+ * class MyState {
+ *   // assignments to state can ONLY be done from unlocked context
+ *   count = 1
+ *   // ..
+ * }
+ * const myState = new myState();
+ *
+ * myState.count++; // <- this will throw an instance of AccessError
+ * unlock(() => myState.count++ ); // this will increment myState.count
+ *
+ * // unlock can also be used as a method decorator
+ * class Actions {
+ *   @unlock()
+ *   increment() {
+ *     myState.count++; // <- this will also work
  *   }
  * }
  * ```
  */
-export function state<
-  V,
-  T extends LitElement | Object | StateOptions<V> = StateOptions<V>
->(target?: T, propertyKey?: string): any {
-  /**
-   * declares state variables in state object
-   */
-  function declareStateVar(opts?: StateOptions<V>) {
-    return function (_target: Object, propertyKey: string): any {
-      const initialized = Symbol('initializing');
-      return {
-        set: function (value: V | undefined) {
-          const stateVar = ensureStateVar(this, propertyKey, opts);
-          if (!this[initialized] && stateVar.options.init) {
-            value = stateVar.options.init(stateVar, value);
-          }
-          const { options } = stateVar;
-          if (options.lock && options.lock.symbol !== __lock) {
-            if (this[initialized] || options.empty) {
-              // initialization is allowed
-              throw new AccessError(propertyKey);
-            }
-          }
-          this[initialized] = true;
-          options.store(stateVar, value);
-        },
-        get: function () {
-          const stateVar = ensureStateVar(this, propertyKey, opts);
-          if (!this[initialized] && stateVar.options.init) {
-            // drive-by init
-            stateVar.value = stateVar.options.init(stateVar);
-          }
-          this[initialized] = true;
-          // track access
-          if (stateVar && __currentController) {
-            stateVar.observers.add(__currentController);
-          }
-          return stateVar.options.load(stateVar);
-        },
-      };
-    };
-  }
+export function locked() {
+  const lock = key();
+  return {
+    state: function lockedState(stateOptions: StateOptions = {}) {
+      return state({ lock, ...stateOptions });
+    },
+    options: function lockedOptions(stateOptions: StateOptions = {}) {
+      return options({ lock, ...stateOptions });
+    },
+    unlock: function unlockState(
+      target?: Object | (() => any),
+      propertyKey?: string,
+      descriptor?: PropertyDescriptor
+    ): any {
+      // decorator
+      if (!(target instanceof Function)) {
+        if (propertyKey && descriptor) {
+          let old = descriptor.value;
+          descriptor.value = function (...args: any[]) {
+            return lock(() => old.apply(this, args));
+          };
+        } else {
+          return unlockState;
+        }
+      } else {
+        // callback
+        lock(target as () => any);
+      }
+    },
+  };
+}
 
-  /**
-   * declares usage of state variables in LitElement classes
-   */
-  function useState(/*options?: UseStateOptions*/) {
-    return function (_target: Object, propertyKey: string): any {
-      const symbol = Symbol(propertyKey);
-      const controllerSymbol = Symbol(propertyKey);
-      return {
-        set: function (state: StateVar) {
-          this[controllerSymbol] = new StateController(
-            this as unknown as ReactiveControllerHost
-            /*, state */
-          );
-          this[symbol] = state;
-        },
-        get: function () {
-          __currentController = this[controllerSymbol];
-          const state = this[symbol];
-          return state;
-        },
-      };
-    };
+/**
+ * helper to merge options
+ */
+function chainOptions(
+  object: Object,
+  propKey: string,
+  optionsBefore: StateOptions = {},
+  optionsAfter: StateOptions = {}
+) {
+  let t = __options.get(object);
+  if (!t) {
+    t = new Map<string, Object>();
+    __options.set(object, t);
   }
-  function invoker(options?: StateOptions<V>) {
-    return function (target: Object, propertyKey: string) {
-      return target instanceof LitElement
-        ? useState(/*options as UseStateOptions*/)(target, propertyKey) // use store in LitElement class
-        : //  propertyKey ?
-          declareStateVar(options as StateOptions<V>)(target, propertyKey);
-      // : declareState((options as any) || target); // declare store
-    };
-  }
-  return target && propertyKey
-    ? invoker()(target, propertyKey) // property decorator w/o options
-    : invoker(target as StateOptions<V>); // property decorator with options
+  const o = { ...optionsBefore, ...(t.get(propKey) || {}), ...optionsAfter };
+  t.set(propKey, o);
+  return o;
 }
 
 /**
@@ -143,196 +379,24 @@ class StateController implements ReactiveController {
   }
   update() {
     const poppedController = __currentController;
+    // controller will be added as dep to all state vars that are accessed moving forward
     __currentController = this;
     this.host.requestUpdate();
     this.host.updateComplete.then(() => {
+      // pop from controller stack
       __currentController = poppedController;
     });
   }
   hostConnected() {
     this.host.updateComplete.then(() => {
+      // pop from controller stack after initial render
       __currentController = undefined;
     });
   }
 }
 
 /**
- * Main class that wraps a state variable
- */
-export class StateVar<T = unknown> {
-  public observers = new Set<StateController>();
-  public options: Required<StateOptions<T>>;
-  constructor(
-    public key: string,
-    options?: StateOptions<T>,
-    public _value?: T
-  ) {
-    this.options = defaultOptions(options as StateOptions) as Required<
-      StateOptions<T>
-    >;
-  }
-
-  set value(v: T | undefined) {
-    this._value = v;
-    this.notifyObservers();
-  }
-  get value(): T | undefined {
-    return this._value;
-  }
-
-  /**
-   * notifies all LitElement observers and all explicitly passed observers
-   */
-  notifyObservers() {
-    for (const observer of this.observers.keys()) {
-      observer.update();
-    }
-    for (const observer of this.options.observers) {
-      observer(this);
-    }
-  }
-}
-
-/**
- * default load and store logic
- */
-function store<V>(stateVar: StateVar<V>, v: V) {
-  if (stateVar.value !== v) {
-    stateVar.value = v;
-  }
-}
-function load<V>(stateVar: StateVar<V>) {
-  return stateVar.value;
-}
-
-let __defaultOptions: Required<StateOptions> = {
-  init: null,
-  store,
-  load,
-  empty: false,
-  observers: [],
-  lock: null,
-};
-
-/**
- * helper to create default options
- */
-function defaultOptions({
-  init = __defaultOptions.init,
-  store = __defaultOptions.store,
-  load = __defaultOptions.load,
-  lock = __defaultOptions.lock,
-  observers = __defaultOptions.observers,
-  empty = __defaultOptions.empty,
-}: StateOptions = {}): Required<StateOptions> {
-  return { empty, observers, init, store, load, lock };
-}
-
-/**
- * helper to create a state var in global states object
- */
-function ensureStateVar<V>(
-  instance: Object,
-  propertyKey: string,
-  options?: StateOptions<V>
-): StateVar<V> {
-  const instanceStates = __states.get(instance) || new Map<string, StateVar>();
-  if (instanceStates.has(propertyKey)) {
-    return instanceStates.get(propertyKey) as StateVar<V>;
-  }
-  const stateVar = new StateVar<V>(propertyKey, options);
-  instanceStates.set(propertyKey, stateVar as StateVar<unknown>);
-  __states.set(instance, instanceStates);
-  return stateVar;
-}
-
-/**
- * Generates an isolated set of decorators
- * for defining, locking and unlocking state
- *
- * ```typescript
- * const {
- *   lockedState,
- *   lockedEmptyState
- *   unlockState,
- * } = makeLockedState();
- *
- * // use as decorators
- * class State {
- *   @lockedState field = 'test';
- * }
- * const myState = new State();
- * unlockState(() => { myState.field = 'changed' });
- * ```
- */
-export function makeLockedState(stateDecorator = state) {
-  const _key = key();
-  function generate(empty: boolean) {
-    return function <V>(options?: StateOptions | Object, propertyKey?: string) {
-      if (propertyKey) {
-        return stateDecorator<V, LitElement | Object>({ lock: _key, empty })(
-          options,
-          propertyKey
-        );
-      }
-      return stateDecorator<V, LitElement | Object>({
-        ...options,
-        lock: _key,
-        empty,
-      });
-    };
-  }
-
-  return {
-    state: generate(false),
-    emptyState: generate(true),
-    unlockState: function (
-      target?: Object | (() => any),
-      propertyKey?: string,
-      descriptor?: PropertyDescriptor
-    ) {
-      // decorator
-      if (propertyKey && descriptor) {
-        let old = descriptor.value;
-        descriptor.value = function (...args: any[]) {
-          return _key(() => old.apply(this, args));
-        };
-      } else {
-        // callback
-        _key(target as () => any);
-      }
-    },
-  };
-}
-
-const globalUnlocked = makeLockedState();
-
-/**
- * Property Decorator
- * Same as `@state` decorator but creates locked states
- * that cannot be modified from within LitElements
- */
-export const lockedState = globalUnlocked.state;
-
-/**
- * Property Decorator
- * Same as `@state` decorator but creates locked states
- * that cannot be modified from within LitElements and
- * is expected to not be initialized
- */
-export const lockedEmptyState = globalUnlocked.emptyState;
-
-/**
- * Method Decorator/callback
- * * Annotate class methods with `@unlockState` to explicitly
- *   allow write access to state from within class methods
- * * Use with callback `unlockState(() => myState.field = 'value')`
- *   to allow write access to state from anywhwere
- */
-export const unlockState = globalUnlocked.unlockState;
-
-/**
- * returns a key that can be used to lock a state
+ * helper that returns a key that can be used to lock a state
  */
 function key() {
   const symbol = Symbol();
@@ -348,6 +412,15 @@ function key() {
 }
 
 /**
+ * thrown when accessing locked state from a locked
+ */
+export class AccessError extends Error {
+  constructor(name: string) {
+    super(`Access to '${name}' is locked. Needs unlocked context for access!`);
+  }
+}
+
+/**
  * logs access to state vars
  * pass via options when declaring state
  *
@@ -360,34 +433,37 @@ function key() {
 const style1 = `background: #e53e3e; border: 1px solid black; border-radius: 4px; color: #000000;`;
 const style2 = `background: #55ad67; border: 1px solid black; border-radius: 4px; color: #000000;`;
 export const log: StateOptions = {
-  store<V>(stateVar: StateVar<V>, v: V) {
+  set<V>(stateVar: StateVar<V>, v: V) {
     console.log(`%c STORE ${stateVar.key} `, style1, stateVar.value, `=>`, v);
-    return store(stateVar, v);
+    return defaultOptions().set(stateVar, v);
   },
-  load<V>(stateVar: StateVar<V>) {
+  get<V>(stateVar: StateVar<V>) {
     console.log(`%c LOAD  ${stateVar.key} `, style2, stateVar.value);
-    return load(stateVar);
+    return defaultOptions().get(stateVar);
   },
 };
 
 /**
- * thrown when trying to access locked state
+ * tracks options per object
  */
-export class AccessError extends Error {
-  constructor(name: string) {
-    super(`Access to '${name}' is locked. Needs unlocked context for access!`);
-  }
-}
+const __options = new WeakMap<Object, Map<string, StateOptions>>();
 
 /**
- * internal module state
+ * all states pointing to their parents
  */
+const __parents = new WeakMap<Object, Ancestor[]>();
+type Ancestor = {
+  propKey: string;
+  parent: StateVar;
+};
 
-//used during dependency tracking
+/**
+ * used during dependency tracking
+ */
 let __currentController: StateController | undefined;
 
-// tracks all states
-const __states = new WeakMap<Object, Map<string, StateVar>>();
-
-// current lock
+/**
+ * current lock
+ */
+type Lock = ((callback: () => any) => any) & { symbol: Symbol };
 let __lock: symbol | null = null;

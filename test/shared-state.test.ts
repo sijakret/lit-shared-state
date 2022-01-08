@@ -3,21 +3,70 @@ import { LitElement, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { fixture } from '@open-wc/testing';
 import {
-  lockedState,
-  unlockState,
-  log,
+  options,
   state,
   StateVar,
-  lockedEmptyState,
+  use,
+  keep,
+  locked,
+  log,
 } from '../src/lit-shared-state';
+
+it('nested states should work', async () => {
+  let rootUpdated = 0;
+
+  @state()
+  class SubSubState {
+    subNumber = 1;
+  }
+
+  @state()
+  class SubState {
+    subNumber = 1;
+    subsub = new SubSubState();
+    subsub2?: SubSubState;
+    subarray = [new SubSubState()];
+  }
+  @state({
+    observers: [
+      () => {
+        rootUpdated++;
+      },
+    ],
+  })
+  class RootState {
+    number: number = 1;
+    sub: SubState = new SubState();
+  }
+
+  const rootState = new RootState();
+  expect(rootUpdated).to.equal(0);
+  rootState.sub.subNumber = 2;
+  expect(rootUpdated).to.equal(1);
+  rootState.sub.subsub.subNumber = 3;
+  expect(rootUpdated).to.equal(2);
+  rootState.sub.subsub = new SubSubState();
+  expect(rootUpdated).to.equal(3);
+  rootState.sub.subsub.subNumber = -1;
+  expect(rootUpdated).to.equal(4);
+  rootState.sub.subarray[0].subNumber++;
+  expect(rootUpdated).to.equal(5);
+  rootState.sub.subarray = [new SubSubState(), new SubSubState()];
+  expect(rootUpdated).to.equal(6);
+  rootState.sub.subarray[1].subNumber++;
+  expect(rootUpdated).to.equal(7);
+});
 
 it('custom observers should work', async () => {
   let fromObserver = 0;
+
+  @state()
   class State {
-    @state<number>({
+    @options({
+      notifyOnInit: true,
       observers: [
-        ({ value }) => {
-          fromObserver = value as number;
+        ({ value }: StateVar<number>) => {
+          fromObserver = value;
         },
       ],
     })
@@ -30,50 +79,155 @@ it('custom observers should work', async () => {
   expect(fromObserver).to.equal(2);
 
   // passing options to locked state should also work
-  class LockedState {
-    @lockedState<number>({
-      observers: [
-        ({ value }) => {
-          fromObserver = value as number;
-        },
-      ],
-    })
-    myNumber: number = 1;
-  }
-  const myLockedState = new LockedState();
-  expect(fromObserver).to.equal(1);
-  expect(() => {
-    myLockedState.myNumber = 2;
-  }).to.throw();
+  // @state()
+  // class LockedState {
+  //   @options({
+  //     observers: [
+  //       ({ value }) => {
+  //         fromObserver = value as number;
+  //       },
+  //     ],
+  //   })
+  //   myNumber: number = 1;
+  // }
+  // const myLockedState = new LockedState();
+  // expect(fromObserver).to.equal(2);
+  // expect(() => {
+  //   myLockedState.myNumber = 2;
+  // }).to.throw();
 });
 
-it('initializer should be called when acessing unassigned var', async () => {
-  let isInitialized = false;
-  let defaultValue = undefined;
+it('computed getters should work', async () => {
+  @state()
   class State {
-    @state({
-      init(_var, value) {
-        defaultValue = value;
-        return 1;
-      },
-    })
-    myNumber: number = 5;
-
-    @state({
-      init(_var) {
-        isInitialized = true;
-        return 1;
-      },
-    })
-    empty?: number;
+    myNumber: number = 1;
+    get computed() {
+      return this.myNumber * 2;
+    }
   }
   const myState = new State();
-  // accesses empty before init, this should call init in getter
-  expect(myState.empty).to.equal(1);
-  expect(isInitialized).to.equal(true);
-  // should initialize
-  expect(myState.myNumber).to.equal(1);
-  expect(defaultValue).to.equal(5);
+
+  @customElement('c0-a')
+  // @ts-ignore
+  class A extends LitElement {
+    @use() state = myState;
+
+    render() {
+      return html`${this.state.computed}`;
+    }
+  }
+
+  const el = (await fixture('<c0-a></c0-a>')) as LitElement;
+  expect(el.renderRoot.textContent).to.equal(`${myState.myNumber * 2}`);
+  myState.myNumber++;
+  await el.updateComplete;
+  expect(myState.myNumber).to.equal(2);
+  expect(el.renderRoot.textContent).to.equal(`${myState.myNumber * 2}`);
+});
+
+it('update across components should work', async () => {
+  @state()
+  class State {
+    myString = 'test-1';
+    flag = false;
+  }
+  const myState = new State();
+
+  @customElement('c2-a')
+  // @ts-ignore
+  class A extends LitElement {
+    @use() state = myState;
+
+    createRenderRoot() {
+      return this;
+    }
+    render() {
+      return html`${this.state.myString}`;
+    }
+  }
+
+  @customElement('c2-b')
+  // @ts-ignore
+  class B extends LitElement {
+    @use() state = myState;
+    createRenderRoot() {
+      return this;
+    }
+    render() {
+      return html`<div
+        clicker
+        @click=${() => (this.state.flag = !!(this.state.myString = 'test-2'))}
+      >
+        ${this.state.flag ? this.state.myString : ''}
+      </div>`;
+    }
+  }
+
+  const el = (await fixture(
+    '<div><c2-a></c2-a>,<c2-b></c2-b></div>'
+  )) as LitElement;
+  const ela = el.querySelector('c2-a') as LitElement;
+  const elb = el.querySelector('c2-b') as LitElement;
+  await ela.updateComplete;
+  await elb.updateComplete;
+  expect(el.innerText).to.equal(`test-1,`);
+  (el.querySelector('[clicker]') as HTMLElement).click();
+  expect(myState.myString).to.equal('test-2');
+  await ela.updateComplete;
+  await elb.updateComplete;
+  expect(el.innerText).to.equal(`test-2,\ntest-2`);
+});
+
+it('custom store and load should work', async () => {
+  let custom: number = 3;
+  let storedName = '',
+    loadedName = '';
+
+  const loadStore = {
+    set({ key }: StateVar, val: number) {
+      custom = val;
+      storedName = key;
+    },
+    get({ key }: StateVar) {
+      loadedName = key;
+      return custom;
+    },
+    init() {
+      return 4;
+    },
+  };
+  expect(storedName).to.equal(``);
+  expect(loadedName).to.equal(``);
+
+  @state(loadStore)
+  class State {
+    myNumber: number = 4;
+  }
+  const myState = new State();
+
+  // no read access should have happened yet
+  expect(loadedName).to.equal(``, 'no read should happen');
+  expect(storedName).to.equal(``, 'no store should happen');
+  myState.myNumber = 3;
+  expect(storedName).to.equal(`myNumber`);
+
+  @customElement('c4-a')
+  // @ts-ignore
+  class A extends LitElement {
+    @use() state = myState;
+
+    render() {
+      return html`${this.state.myNumber}`;
+    }
+  }
+
+  const el = (await fixture('<c4-a></c4-a>')) as LitElement;
+
+  // read access should have happened by now
+  expect(loadedName).to.equal(`myNumber`);
+
+  expect(el.renderRoot.textContent).to.equal(`3`);
+  expect(custom).to.equal(3);
 });
 
 it('basic update cycle with objects work', async () => {
@@ -83,15 +237,27 @@ it('basic update cycle with objects work', async () => {
       id: number;
     }[];
   };
+  const data = {
+    array: [
+      {
+        name: 'test',
+        id: 0,
+      },
+    ],
+  };
+  @state()
   class State {
-    @state data?: Data;
+    data: Data = data;
+    test() {}
   }
   const myState = new State();
+
+  expect(myState.data).to.equal(data);
 
   @customElement('c-obj')
   // @ts-ignore
   class A extends LitElement {
-    @state state = myState;
+    @use() state = myState;
 
     render() {
       return html`${this.state.data?.array.map(
@@ -101,7 +267,9 @@ it('basic update cycle with objects work', async () => {
   }
 
   const el = (await fixture('<c-obj></c-obj>')) as LitElement;
-  expect(el.renderRoot.textContent).to.equal(``);
+  await el.updateComplete;
+
+  expect(el.renderRoot.textContent).to.equal(`0:test`);
   myState.data = {
     array: [
       { id: 0, name: 'jane' },
@@ -122,9 +290,10 @@ it('basic update cycle with objects work', async () => {
 });
 
 it('render calls should be lazy', async () => {
+  @state()
   class State {
-    @state() myUsedState: number = 1;
-    @state myUnusedState: number = 1;
+    myUsedState: number = 1;
+    myUnusedState: number = 1;
   }
   const myState = new State();
   let numRenderCalls = 0;
@@ -132,7 +301,7 @@ it('render calls should be lazy', async () => {
   @customElement('c5-a')
   // @ts-ignore
   class A extends LitElement {
-    @state() state = myState;
+    @use() state = myState;
 
     render() {
       numRenderCalls++;
@@ -168,257 +337,69 @@ it('render calls should be lazy', async () => {
   expect(numRenderCalls).to.equal(4);
 });
 
-it('computed getters should work', async () => {
+it('optional props should throw ithout @keep()', async () => {
+  @state()
   class State {
-    @state myNumber: number = 1;
-    get computed() {
-      return this.myNumber * 2;
-    }
+    @keep() empty?: number;
+    empty2?: number;
   }
   const myState = new State();
 
-  @customElement('c0-a')
-  // @ts-ignore
-  class A extends LitElement {
-    @state state = myState;
+  expect(() => {
+    myState.empty = 1;
+  }).to.not.throw();
 
-    render() {
-      return html`${this.state.computed}`;
+  expect(() => {
+    myState.empty2 = 1;
+  }).to.throw();
+
+  {
+    @state({ noSeal: true })
+    class State {
+      empty?: number;
     }
+    const myState = new State();
+
+    expect(() => {
+      myState.empty = 1;
+    }).to.not.throw();
   }
-
-  const el = (await fixture('<c0-a></c0-a>')) as LitElement;
-  expect(el.renderRoot.textContent).to.equal(`${myState.myNumber * 2}`);
-  myState.myNumber++;
-  await el.updateComplete;
-  expect(myState.myNumber).to.equal(2);
-  expect(el.renderRoot.textContent).to.equal(`${myState.myNumber * 2}`);
-});
-
-it('update across components should work', async () => {
-  class State {
-    @state myString = 'test-1';
-    @state flag = false;
-  }
-  const myState = new State();
-
-  @customElement('c2-a')
-  // @ts-ignore
-  class A extends LitElement {
-    @state() state = myState;
-
-    createRenderRoot() {
-      return this;
-    }
-    render() {
-      return html`${this.state.myString}`;
-    }
-  }
-
-  @customElement('c2-b')
-  // @ts-ignore
-  class B extends LitElement {
-    @state() state = myState;
-    createRenderRoot() {
-      return this;
-    }
-    render() {
-      return html`<div
-        clicker
-        @click=${() => (this.state.flag = !!(this.state.myString = 'test-2'))}
-      >
-        ${this.state.flag ? this.state.myString : ''}
-      </div>`;
-    }
-  }
-
-  const el = (await fixture(
-    '<div><c2-a></c2-a>,<c2-b></c2-b></div>'
-  )) as LitElement;
-  const ela = el.querySelector('c2-a') as LitElement;
-  const elb = el.querySelector('c2-b') as LitElement;
-  await ela.updateComplete;
-  await elb.updateComplete;
-  expect(el.innerText).to.equal(`test-1,`);
-  (el.querySelector('[clicker]') as HTMLElement).click();
-  expect(myState.myString).to.equal('test-2');
-  await ela.updateComplete;
-  await elb.updateComplete;
-  expect(el.innerText).to.equal(`test-2,\ntest-2`);
-});
-
-it('custom store and load should work', async () => {
-  let custom: number = 3;
-  let storedName = '',
-    loadedName = '';
-
-  const customState = state({
-    store({ key }: StateVar, val: number) {
-      custom = val;
-      storedName = key;
-    },
-    load({ key }: StateVar) {
-      loadedName = key;
-      return custom;
-    },
-    init() {
-      return 4;
-    },
-  });
-  expect(storedName).to.equal(``);
-  expect(loadedName).to.equal(``);
-  class State {
-    @customState myNumber: number = 4;
-  }
-  const myState = new State();
-
-  // no read access should have happened yet
-  expect(storedName).to.equal(`myNumber`);
-  expect(loadedName).to.equal(``);
-
-  @customElement('c4-a')
-  // @ts-ignore
-  class A extends LitElement {
-    @state state = myState;
-
-    render() {
-      return html`${this.state.myNumber}`;
-    }
-  }
-
-  const el = (await fixture('<c4-a></c4-a>')) as LitElement;
-
-  // read access should have happened by now
-  expect(storedName).to.equal(`myNumber`);
-  expect(loadedName).to.equal(`myNumber`);
-
-  expect(el.renderRoot.textContent).to.equal(`4`);
-  expect(custom).to.equal(4);
-});
-
-it('real-life nested state update cycle should work', async () => {
-  class NestedState {
-    @state myNestedString = '-nested';
-    @state mySecondNestedString = '-nested-second';
-  }
-  class State {
-    @state() myNumber: number = 1;
-    @state() nested = [new NestedState()];
-  }
-  const myState = new State();
-
-  let numRenderedB = 0;
-  @customElement('c3-b')
-  // @ts-ignore
-  class B extends LitElement {
-    @state() state = myState;
-
-    render() {
-      numRenderedB++;
-      return html`${this.state.nested[0].mySecondNestedString}`;
-    }
-  }
-
-  let numRenderedA = 0;
-  @customElement('c3-a')
-  // @ts-ignore
-  class A extends LitElement {
-    @state() state = myState;
-
-    render() {
-      numRenderedA++;
-      return html`${this.state.myNumber}${this.state.nested.map(
-        (n) => n.myNestedString
-      )}`;
-    }
-  }
-
-  @customElement('c3-host')
-  // @ts-ignore
-  class Host extends LitElement {
-    @state() state = myState; // not using any of it
-
-    render() {
-      return html`<c3-a></c3-a><c3-b></c3-b>`;
-    }
-  }
-
-  const el = (await fixture('<c3-host></c3-host>')) as LitElement;
-  const a = el.renderRoot.querySelector('c3-a') as LitElement;
-  const b = el.renderRoot.querySelector('c3-b') as LitElement;
-  await a.updateComplete;
-  await b.updateComplete;
-  await el.updateComplete;
-  expect(numRenderedB).to.equal(1);
-  expect(numRenderedA).to.equal(1);
-  expect(a.renderRoot.textContent).to.equal(
-    `${myState.myNumber}${myState.nested[0].myNestedString}`
-  );
-  // multiple updates should not mess with controller stack..
-  myState.myNumber++;
-  myState.nested[0].myNestedString = `${myState.nested[0].myNestedString}-modified`;
-  myState.myNumber++;
-  await el.updateComplete;
-  expect(a.renderRoot.textContent).to.equal(`3-nested-modified`);
-  expect(b.renderRoot.textContent).to.equal(`-nested-second`);
-  expect(numRenderedA).to.equal(2);
-  expect(numRenderedB).to.equal(1);
-
-  // changing state only used in B should not cause rerender in A
-  myState.nested[0].mySecondNestedString = 'second-changed';
-  await el.updateComplete;
-  expect(a.renderRoot.textContent).to.equal(`3-nested-modified`); // should not have chaned
-  expect(b.renderRoot.textContent).to.equal(`second-changed`); // should have changed
-  expect(numRenderedB).to.equal(2);
-  expect(numRenderedA).to.equal(2);
-
-  const nestedOther = new NestedState();
-  myState.nested = [...myState.nested, nestedOther];
-  await el.updateComplete;
-  expect(a.renderRoot.textContent).to.equal(`3-nested-modified-nested`);
-  expect(numRenderedB).to.equal(3);
-  expect(numRenderedA).to.equal(3);
-
-  nestedOther.myNestedString = '-nested-second-modified';
-  await el.updateComplete;
-  expect(a.renderRoot.textContent).to.equal(
-    `3-nested-modified-nested-second-modified`
-  );
-  expect(numRenderedB).to.equal(3);
-  expect(numRenderedA).to.equal(4);
 });
 
 it('locking should work', async () => {
+  const { state, options, unlock } = locked();
+
+  @state()
   class State {
-    // check use without options
-    @lockedState() myNumber: number = 2;
-    // any write access to this should fail!
-    @lockedState() uninitialized?: number | undefined = undefined;
+    // any write access to these should fail!
+    myNumber: number = 2;
+    @options({ lock: null }) uninitialized?: number | undefined = undefined;
+    @keep() empty?: string;
 
-    @lockedEmptyState empty?: string;
-
-    @unlockState works() {
+    @unlock()
+    works() {
       this.myNumber++;
     }
   }
   const myState = new State();
 
   expect(() => {
+    @state()
     class State {
-      @lockedEmptyState() myNumber: number = 2;
+      myNumber: number = 2;
     }
     new State();
-  }).to.throw();
+  }, 'initializer allowed on locked state').to.not.throw();
 
   // access to empty state should be locked right away
   expect(() => {
     myState.empty = 'boom';
   }).to.throw();
 
-  // any access should be locked
+  // any access should NOT be locked (local override)
   expect(() => {
     myState.uninitialized = 1;
-  }).to.throw();
+  }).to.not.throw();
 
   // any access should be locked
   expect(() => {
@@ -426,22 +407,28 @@ it('locking should work', async () => {
   }).to.throw();
 
   // unless in unlocked context
-  unlockState(() => {
+  unlock(() => {
     myState.myNumber = 1;
   });
+
+  // unless in unlocked context
+  unlock(() => {
+    myState.empty = 'asd';
+  });
+  expect(myState.empty).to.equal('asd');
 
   @customElement('c1-lock')
   // @ts-ignore
   class A extends LitElement {
     // check use with options
-    @lockedState() state = myState;
+    @use() state = myState;
 
     accessLockedState() {
       // writing should not be
       this.state.myNumber = 1;
     }
 
-    @unlockState
+    @unlock
     accessLockedStateSuccessfully() {
       // writing should not be
       this.state.myNumber = 1;
@@ -471,8 +458,9 @@ it('locking should work', async () => {
 });
 
 it('access logging should work', async () => {
+  @state()
   class State {
-    @state({ ...log }) myNumber: number = 1;
+    @options({ ...log }) myNumber: number = 1;
   }
   const myState = new State();
 

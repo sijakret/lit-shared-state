@@ -47,7 +47,11 @@
           logging,
           observers,
           all,
-        ];
+        ].map((item) => ({
+          ...item,
+          name: item.filename.replace('.md', ''),
+          hash: item.filename.replace('.md', '').split(' ').join('-'),
+        }));
 
         class Doc extends LitElement {
           createRenderRoot() {
@@ -62,7 +66,8 @@
             }, 300);
           }
           render() {
-            return html` <h1 id="top">lit-shared-state</h1>
+            return html` <h1 id="top">lit-shared-state@${__VERSION__}</h1>
+
               <p>
                 This page contains a live samples on how simple it is to use
                 <a href="https://github.com/sijakret/lit-shared-state"
@@ -75,8 +80,8 @@
                 management
               </p>
               ${chapters.map(
-                ({ html: doc }, i) =>
-                  html`<section id="section${i}">${unsafeHTML(doc)}</section>`
+                ({ html: doc, name, hash }, i) =>
+                  html`<section id="${hash}">${unsafeHTML(doc)}</section>`
               )}`;
           }
         }
@@ -89,13 +94,11 @@
           render() {
             return html` <div nav-header>
                 <a href="#top">lit-shared-state</a>
+                <div version>${__VERSION__}</div>
               </div>
               <br /><br />
               ${chapters.map(
-                ({ filename }, i) =>
-                  html`<a href="#section${i}"
-                    >${filename.replace('.md', '')}</a
-                  >`
+                ({ name, hash }, i) => html`<a href="#${hash}">${name}</a>`
               )}
               <br /><br />
               <a href="./api/">API</a>`;

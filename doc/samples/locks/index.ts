@@ -1,11 +1,11 @@
 import { LitElement, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { state } from 'lit-shared-state';
+import { use } from 'lit-shared-state';
 import { mySharedState, actions } from './my-state.js';
 
 @customElement('comp-a')
 class CompA extends LitElement {
-  @state state = mySharedState;
+  @use() state = mySharedState;
 
   // this does not work, this.state.count is locked!
   click() {
@@ -21,7 +21,7 @@ class CompA extends LitElement {
 
 @customElement('comp-b')
 class CompB extends LitElement {
-  @state state = mySharedState;
+  @use() state = mySharedState;
 
   render() {
     // state.increment and actions.decrement have an unlocked context!

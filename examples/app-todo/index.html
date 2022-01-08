@@ -18,21 +18,23 @@
     <style>
       body,
       html {
+        font-family: Roboto;
         height: 100%;
       }
       body {
         display: flex;
       }
       todo-list {
-        height: calc(100% - 60px);
-        padding: 30px;
+        height: calc(100% - 100px);
+        padding: 16px;
+        margin: 16px;
         flex: 1 0;
       }
     </style>
   </head>
   <body>
-    <script type="module" src="src/index.ts"></script>
-    <todo-list>Todo list 1</todo-list>
-    <todo-list>Todo list 2</todo-list>
+    <script type="module" src="src/todo-list-component.ts"></script>
+    <todo-list>Todos 1</todo-list>
+    <todo-list>Todos 2</todo-list>
   </body>
 </html>

@@ -1,11 +1,11 @@
 import { LitElement, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { state } from 'lit-shared-state';
+import { use } from 'lit-shared-state';
 import { searchState } from './search-state.js';
 
 @customElement('search-component')
 class Component extends LitElement {
-  @state state = searchState;
+  @use() state = searchState;
 
   runSearch({ target }: { target: HTMLInputElement }) {
     // searchString ends up in localStorage
@@ -27,7 +27,7 @@ class Component extends LitElement {
 // this component just displays current state
 @customElement('secondary-component')
 class SecondaryComponent extends LitElement {
-  @state state = searchState;
+  @use() state = searchState;
 
   render() {
     return html`<h4>Secondary</h4>

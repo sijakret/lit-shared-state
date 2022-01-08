@@ -66,7 +66,7 @@ export class CodeSample extends LitElement {
         },
         dependencies: {
           lit: '^2.0.2',
-          'lit-shared-state': '..',
+          'lit-shared-state': __VERSION__,
         },
       }}
     >

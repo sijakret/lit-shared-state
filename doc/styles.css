@@ -51,6 +51,11 @@ text-decoration: none;
 my-nav a:hover {
 background: rgba(255, 255, 255, 0.1);
 }
+my-nav [version] {
+    font-size: 16px;
+    display: block;
+    text-align: right;
+}
 [content] {
 padding-top: 20px;
 display: flex;

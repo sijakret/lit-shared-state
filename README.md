@@ -67,7 +67,7 @@ globalState.reactiveState += 41;
 ## Gotchas
 
 ### Updating nested objects
-Updating nested fields in `@state`-annotated properties will not trigger a rerender (behavior is the same as in `LitElement`).
+Updating nested properties in `@state`-annotated properties will not trigger a rerender (behavior is the same as in `LitElement`).
 
 ```ts
 class State {
