@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>lit-shared-state todo sample</title>
+
+    <!-- Your application must load the Roboto and Material Icons fonts. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Material+Icons&display=block"
+      rel="stylesheet"
+    />
+    <style>
+      body,
+      html {
+        font-family: Roboto;
+        height: 100%;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+      }
+      todo-list {
+        padding: 16px;
+        margin: 16px;
+        flex: 1 0;
+      }
+      [info] {
+        flex: 0 1;
+        height: 0%;
+        width: 100%;
+        padding: 16px;
+        margin: 16px;
+      }
+      [todos] {
+        flex: 1 0;
+        display: flex;
+        flex-direction: row;
+      }
+      [history] {
+        flex: 0 1;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="module" src="src/todo-list-component.ts"></script>
+    <script type="module" src="src/time-travel-component.ts"></script>
+
+    <div info>Use the time travel slider to travel pack in time :)</div>
+    <time-travel history></time-travel>
+    <div todos>
+      <todo-list>Todos 1</todo-list>
+      <todo-list>Todos 2</todo-list>
+    </div>
+  </body>
+</html>
