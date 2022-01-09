@@ -18,7 +18,7 @@ The pattern described in this section is best suited for storing small slices of
 If you intend on serializing and deserializing more complex state we recommend [class-transformer](https://www.npmjs.com/package/class-transformer).
 It provides a set of straight forward decorators to make your (nested) state (de)serializable.
 
-Take a lookt at section [Putting-it-all-together](#Putting-it-all-together) for an example on how to do this.
+Take a lookt at section [Sample Apps](#Sample-Apps) for an example on how to do this.
 
 
 #### Relevant APIs
