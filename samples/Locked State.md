@@ -18,7 +18,7 @@ Take a look at the basic example rewritten to use locks.
 
 <code-sample folder="samples/locks" style="height: 600px;"> </code-sample>
 
-### Relevant APIs
+#### Relevant APIs
 * [locked](api/modules.html#locked) - creates locked state decorators
 
 This pattern is extremely powerful since it allows for very transparent state manpulation patterns

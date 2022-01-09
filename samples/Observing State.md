@@ -20,5 +20,5 @@ class State {
 > to have code that orchestrates your sequence and just reads and writes state.
 
 
-### Relevant APIs
+#### Relevant APIs
 * [observers Option](api/interfaces/StateOptions.html#observers) - set custom observers
