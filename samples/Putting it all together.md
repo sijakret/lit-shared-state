@@ -1,5 +1,8 @@
 ## Putting it all together
 
-This sample uses a small todo list application to illustrate usage of `lit-shared-state`.
+The following samples illsutrate
 
-<code-sample folder="samples/sample-app" style="height: 600px;"> </code-sample>
+### Todo List App - [try on stackblitz](https://stackblitz.com/github/sijakret/lit-shared-state/tree/main/examples/app-todo)
+
+Simple todo list with two views that are synced via `lit-shared-state`.
+The full app state (including selection etc..) is persisted in localStorage.
