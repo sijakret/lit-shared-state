@@ -8,14 +8,12 @@ npm install lit-shared-state
 
 > lit-shared-state currently assumes you have a typescript project with decorator support
 
-At its core `lit-shared-state` provides three main decorators factory functions ```@state```, ```@use```, ```@options``` decorator which can be used to annotate state in state classes and also to indicate use of such state in a `LitElement` subclass.
+At its core `lit-shared-state` provides three main decorators ```@state()```, ```@use()```, ```@options()``` decorator which can be used to annotate state in state classes and also to indicate use of such state in a `LitElement` subclass.
 
 * ```@state(options?: StateOptions)``` (Class Decorator) - [API](api/modules.html#state)
-  * can be shared and will update across compontents
-  * is reactive and lazy: only relevant slices of state lead to updates
+  * defines state which can be shared and will update across compontents
 * ```@use()``` (Property Decorator) - [API](api/modules.html#use)
   * indicates usage of a state object in a LitElement-derived class
-  * knows if it is applied to declare or use state
 * ```@options(options: StateOptions)``` (Property Decorator) - [API](api/modules.html#options)
   * can override options per state property (rarely needed)
 

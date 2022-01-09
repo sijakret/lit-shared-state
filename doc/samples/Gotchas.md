@@ -4,9 +4,9 @@ This sections deals with a few important details.
 
 ### Optional values
 
-Due to the way typescript and our decorators work you need to make sure
-* all properties are initialized
-* uninitialized properties need to be annoated with ```@keep()```
+Due to the way typescript and our decorators work you need to make sure..
+* ..all properties are either initialized
+* ..or uninitialized properties are annoated with ```@keep()```
 
 ```ts
 class State {
@@ -23,8 +23,14 @@ class State {
 }
 ```
 
-### Updating nested objects
-Updating nested properties in `@state`-annotated properties will not trigger a rerender (behavior is the same as in `LitElement`).
+### Nested State
+
+You can nest ```@state()```-annotated class instances as you please.
+
+Updating nested ```@state()```-annotated properties will trigger updates as you would expect.
+
+However, updating nested fields raw Objects will not result in a render unless you overwrite the properties which are immediate children of the ```@state()``` class properties (This behavior is the same as in `LitElement`).
+
 
 ```ts
 @state()
@@ -44,8 +50,9 @@ myState.array = [ ...myState.object, 'c' ];
 ```
 
 ### Pre-sliced state
-Due to the way our dependency tracking works you always need to access `this.[myState].[myField]` directly in your render code path.
-Instead we recommend you use getters.
+Due to the way our dependency tracking works you always need to access `this.myState.myProp` directly in your render code path.
+
+You should NOT pre-slice your state. Instead we recommend you use getters if you need shortcuts.
 
 ```ts
 @state()

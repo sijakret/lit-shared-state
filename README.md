@@ -2,17 +2,18 @@
 
 [![Coverage Status](https://coveralls.io/repos/github/sijakret/lit-shared-state/badge.svg?branch=main)](https://coveralls.io/github/sijakret/lit-shared-state?branch=main)
 
-*The easiest way to share global state between [LitElement](https://lit.dev/docs/components/overview/) instances*
+*A reactive shared state management solution for [LitElement](https://lit.dev/docs/components/overview/) instances*
 
 > Note: requires lit@^2 + typescript for decorators
 
-[Documentation](https://sijakret.github.io/lit-shared-state)
+[Documentation and Samples](https://sijakret.github.io/lit-shared-state)
 
 ## Highlights
 lit-shared state was built to be..
 * **reactive** - state can be shared and will update across compontents
 * **simple** - extremely minimal api surface, not much doc required :)
-* **performant** - lazy: only relevant slices of state lead to updates
+* **performant** - only relevent parts of state trigger rerenders when changed
+* **transactional** - updates can be batched
 * **flexible** - supports favorite patterns of both mobx (reactivity) and redux (directed data flow)
 * **tiny** - less than 300 lines of commented typescript (~3.4KB minified, ~1.4KB gzipped), no deps (except for `lit` of course)
 

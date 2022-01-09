@@ -10,6 +10,8 @@ import {
   keep,
   locked,
   log,
+  transaction,
+  ReadonlyStateVar,
 } from '../src/lit-shared-state';
 
 it('nested states should work', async () => {
@@ -65,8 +67,8 @@ it('custom observers should work', async () => {
     @options({
       notifyOnInit: true,
       observers: [
-        ({ value }: StateVar<number>) => {
-          fromObserver = value;
+        (changed: Set<StateVar<number>>) => {
+          fromObserver = Array.from(changed.values())[0].value as number;
         },
       ],
     })
@@ -475,4 +477,55 @@ it('access logging should work', async () => {
   myState.myNumber = 0;
   expect(numLogs).to.equal(2);
   console.log = l;
+});
+
+it('transaction should batch mutations', async () => {
+  let numObserverCalls = 0;
+  let lastcallArg = new Set<ReadonlyStateVar>();
+
+  @state()
+  class ChildState {
+    c = 1;
+  }
+  @state({
+    observers: [
+      (arg) => {
+        numObserverCalls++;
+        lastcallArg = arg;
+      },
+    ],
+  })
+  class State {
+    a: number = 1;
+    b: number = 1;
+    child = new ChildState();
+
+    nonTransactional() {
+      this.a++;
+      this.b++;
+      this.child.c++;
+    }
+
+    @transaction()
+    transactional() {
+      this.nonTransactional();
+    }
+  }
+  const myState = new State();
+  expect(numObserverCalls).to.equal(0);
+
+  // produces many update calls
+  myState.nonTransactional();
+  expect(numObserverCalls).to.equal(3);
+  expect(myState.a).to.equal(2);
+  expect(myState.a).to.equal(myState.b);
+  expect(myState.b).to.equal(myState.child.c);
+
+  // produces exacly one update call
+  myState.transactional();
+  expect(numObserverCalls).to.equal(4);
+  expect(myState.a).to.equal(3);
+  expect(myState.a).to.equal(myState.b);
+  expect(myState.b).to.equal(myState.child.c);
+  expect(lastcallArg.size).to.equal(3);
 });

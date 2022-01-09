@@ -1,16 +1,16 @@
 ## Locked state
 
-By default, properties in ```@state```-annotated classes can be set from anywhere in your app.
+By default, properties in ```@state()```-annotated objects can be mutated from anywhere in your app.
 
 This is very handy and allows for very quick turn-around during development.
 
 For complex apps, however, this can become a problem since it is increasingly difficult to know where and when state was changed and who changed it.
 
-To solve this, we provde a locking mechanism that protects properties from any access _except for a defined context_.
+To solve this, we provide a locking mechanism that protects properties from any access _except for a defined context_.
 
 This allows you to 
 * pass state into LitElements without having to worry about unforseen side effects.
-* explicitly limit state changes to a defined context
+* explicitly limit state mutations to a defined context
 
 While `lit-shared-state` implicitly tracks dependencies similar to [mobx](https://www.npmjs.com/package/mobx). This means that `locks` allow you to very easily implement patterns similar to a reducer in [redux](https://www.npmjs.com/package/redux).
 

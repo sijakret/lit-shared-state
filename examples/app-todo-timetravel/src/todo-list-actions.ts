@@ -1,6 +1,8 @@
+import { transaction } from 'lit-shared-state';
 import { Todo, unlock, rootState, TodoListState } from './todo-list-state';
 
 class TodoListActions {
+  @transaction()
   @unlock()
   commitCurrentTodo() {
     const todoList = rootState.todoList;
@@ -10,12 +12,14 @@ class TodoListActions {
     }
   }
 
+  @transaction()
   @unlock()
   editCurrentTodo(todo: Todo) {
     const todoList = rootState.todoList;
     todoList.currentTodo = todo;
   }
 
+  @transaction()
   @unlock()
   setSelected(todo: Todo, selected = true) {
     if (todo) {
@@ -24,6 +28,7 @@ class TodoListActions {
     }
   }
 
+  @transaction()
   @unlock()
   deleteSelected() {
     const todoList = rootState.todoList;

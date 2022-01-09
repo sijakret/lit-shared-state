@@ -1,6 +1,6 @@
 ## Custom Storage
 
-By default ```@state``` takes care of storing data in memory as is.
+By default ```@state()``` takes care of storing data in memory as is.
 
 You can plug in your own logic to store and load data.
 For instance you could tie parts of your state to localstorage or another DB.
@@ -18,7 +18,7 @@ The pattern described in this section is best suited for storing small slices of
 If you intend on serializing and deserializing more complex state we recommend [class-transformer](https://www.npmjs.com/package/class-transformer).
 It provides a set of straight forward decorators to make your (nested) state (de)serializable.
 
-Take a lookt at section [Putting-it-all-together](#Putting-it-all-together) for an example on how to do this.
+Take a lookt at section [Sample Apps](#Sample-Apps) for an example on how to do this.
 
 
 #### Relevant APIs
