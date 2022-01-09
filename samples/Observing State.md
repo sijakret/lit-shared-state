@@ -5,7 +5,7 @@ If you want to observe changes to a state variable you can pass a custom callbac
 ```ts
 import { state } from 'lit-shared-state';
 
-function observer<T>({value}:StateVar<T>) {
+function observer({value}:ReadonlyStateVar) {
     console.log('new value:', value);
 }
 
