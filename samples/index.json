@@ -1,0 +1,8 @@
+{
+    "files": [
+        "search-state.ts",
+        "state-persist.ts",
+        "index.ts",
+        "index.html"
+    ]
+}
