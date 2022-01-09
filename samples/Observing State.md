@@ -21,4 +21,4 @@ class State {
 
 
 ### Relevant APIs
-* [StateOptions](api/interfaces/StateOptions.html#observers) - get/set - customization for logging
+* [observers Option](api/interfaces/StateOptions.html#observers) - set custom observers
