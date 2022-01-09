@@ -29,7 +29,7 @@ export interface StateOptions<T = any> {
   /**
    * all observers will be called everytime the value of state var changes
    */
-  observers?: ((stateVar: ReadonlyStateVar<T>) => void)[];
+  observers?: ((changed: Set<ReadonlyStateVar<T>>) => void)[];
   /**
    * if true observers will already be notified on init
    */
@@ -165,14 +165,84 @@ export class StateVar<T = unknown> {
     for (const observer of this.observers.keys()) {
       observer.update();
     }
-    // custo observers
+    // custom observers
     for (const observer of this.options.observers) {
-      observer(this);
+      __currentTransaction
+        ? __currentTransaction.deferr(observer, this)
+        : observer(new Set([this]));
     }
     // parent states
     const parents = __parents.get(this.parent) as Ancestor[];
     for (const { parent } of parents) {
       parent.notifyObservers();
+    }
+  }
+}
+
+/**
+ * Method Decorator, also takes callback
+ * Annotated methods will only lead to one invocation of dependant observers.
+ *
+ * ```typescript
+ * const {transaction} = locked();
+ *
+ * class Actions {
+ *
+ *   @transaction()
+ *   complexMutation() {
+ *      // all of these state mutations will only lead to one invocation
+ *      // for each observer
+ *      state.count *= 2;
+ *      state.array = [...state.array, state.count];
+ *      // ...
+ *   }
+ * }
+ *
+ * ```
+ */
+export function transaction(
+  target?: Object | (() => any),
+  propertyKey?: string,
+  descriptor?: PropertyDescriptor
+): any {
+  // decorator
+  if (!(target instanceof Function)) {
+    if (propertyKey && descriptor) {
+      let old = descriptor.value;
+      descriptor.value = function (...args: any[]) {
+        return transaction(() => old.apply(this, args));
+      };
+    } else {
+      return transaction;
+    }
+  } else {
+    // callback
+    Transaction.execute(target as () => any);
+  }
+}
+
+let __currentTransaction: Transaction | undefined = undefined;
+class Transaction {
+  deferred = new Map<(arg?: any) => void, Set<any>>();
+
+  static execute(callback: () => void) {
+    const popped = __currentTransaction;
+    const transaction = (__currentTransaction = new Transaction());
+    callback();
+    transaction.runDeferred();
+    __currentTransaction = popped;
+  }
+
+  deferr(callback: (arg?: any) => void, arg: any) {
+    let cb = this.deferred.get(callback);
+    cb = cb || new Set();
+    cb.add(arg);
+    this.deferred.set(callback, cb);
+  }
+
+  protected runDeferred() {
+    for (const [callback, args] of this.deferred.entries()) {
+      callback(args);
     }
   }
 }

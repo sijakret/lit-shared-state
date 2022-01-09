@@ -1,6 +1,6 @@
 ## Custom Storage
 
-By default ```@state``` takes care of storing data in memory as is.
+By default ```@state()``` takes care of storing data in memory as is.
 
 You can plug in your own logic to store and load data.
 For instance you could tie parts of your state to localstorage or another DB.
