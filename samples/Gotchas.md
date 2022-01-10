@@ -29,7 +29,9 @@ You can nest ```@state()```-annotated class instances as you please.
 
 Updating nested ```@state()```-annotated properties will trigger updates as you would expect.
 
-However, updating nested fields raw Objects will not result in a render unless you overwrite the properties which are immediate children of the ```@state()``` class properties (This behavior is the same as in `LitElement`).
+If you store Objects in your state, only the top-level reference will be watched by `lit-shared-state`- we do not patch the whole object to make it reactive.
+This means updating nested fields raw Objects will not result in a renders/observer invocations.
+This behavior is identical to properties in `LitElement`.
 
 
 ```ts
