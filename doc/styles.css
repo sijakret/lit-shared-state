@@ -50,6 +50,9 @@ my-nav li,
   text-decoration: none;
   padding: 8px;
 }
+[nav-header] {
+  margin-left: 16px;
+}
 my-nav a,
 my-nav a:visited,
 my-nav li::before {

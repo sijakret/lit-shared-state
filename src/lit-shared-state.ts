@@ -1,45 +1,47 @@
 import { ReactiveController, ReactiveControllerHost } from 'lit';
 
 /**
- * Options for creating a state object
- * apply for all properties in a state via @state(options)
- * or for individual properties via @options(options) decorator
+ * Options for creating a state object.
+ * Apply for all properties in a state via @state(options)
+ * or for individual properties via @options(options) decorator.
  */
 export interface StateOptions<T = any> {
   /**
    * overrides logic to store state
    * runs everytime stateVar is asigned a new value.
-   * method is allowed to set stateVar.value
+   *
+   * Is allowed to set stateVar.value
+   *
    * IMPORTANT: if you do NOT set stateVar.value you need to call
-   * stteVar.notifyObservers() to indicate data has updated
+   * stteVar.notifyObservers() to indicate data has updated.
    */
   set?: (stateVar: StateVar<T>, value: T | undefined) => void;
   /**
-   * overrides logic to load state
-   * runs everytime stateVar is ready anywhere
+   * Overrides logic to load state.
+   * Runs everytime stateVar is ready anywhere.
    * method needs to return current value!
    */
   get?: (stateVar: ReadonlyStateVar<T>) => T | undefined;
   /**
-   * overrides logic to initialize state
-   * method needs to return initial value value!
+   * Overrides logic to initialize state.
+   * Method needs to return initial value value!
    * @param value: default initialization value
    */
   init?: ((stateVar: ReadonlyStateVar<T>, value?: T) => T | undefined) | null;
   /**
-   * all observers will be called everytime the value of state var changes
+   * All observers will be called everytime the value of state var changes.
    */
   observers?: ((changed: Set<ReadonlyStateVar<T>>) => void)[];
   /**
-   * if true observers will already be notified on init
+   * If true observers will already be notified on init.
    */
   notifyOnInit?: boolean;
   /**
-   * used internally to provide a lock for avariable
+   * Used internally to provide a lock for avariable.
    */
   lock?: Lock | null;
   /**
-   * if true state objects will not be sealed automatically
+   * If true state objects will not be sealed automatically.
    */
   noSeal?: boolean;
 }
@@ -132,7 +134,7 @@ function defineState<T>(
 }
 
 /**
- * instance of a tracked state field
+ * Instance of a tracked state field.
  */
 export class StateVar<T = unknown> {
   public observers = new Set<StateController>();
@@ -181,6 +183,7 @@ export class StateVar<T = unknown> {
 
 /**
  * Method Decorator, also takes callback
+ *
  * Annotated methods will only lead to one invocation of dependant observers.
  *
  * ```typescript
@@ -197,6 +200,12 @@ export class StateVar<T = unknown> {
  *      // ...
  *   }
  * }
+ *
+ * // also possible
+ * transaction(() => {
+ *   state.count *= 2;
+ *   state.array = [...state.array, state.count];
+ * })
  *
  * ```
  */
@@ -247,6 +256,9 @@ class Transaction {
   }
 }
 
+/**
+ * Read only version of StateVar where value shall not be mutated.
+ */
 export abstract class ReadonlyStateVar<T = unknown> extends StateVar<T> {
   public abstract get value(): T | undefined;
   protected abstract set value(_value: T | undefined);
@@ -276,8 +288,9 @@ function defaultOptions({
 }
 
 /**
- * Class Decorator
- * Used to pull state into a LitElement
+ * Property Decorator
+ *
+ * Used to pull state into a LitElement.
  *
  * ```typescript
  * @state()
@@ -318,7 +331,8 @@ export function use() {
 
 /**
  * Property Decorator
- * optional state properties need to be annotated with this for proper tracking
+ *
+ * optional state properties need to be annotated with this for proper tracking.
  *
  * ```typescript
  * @state()
@@ -339,7 +353,9 @@ const __optionals = new WeakMap<Object, Set<string>>();
 
 /**
  * Property Decorator
- * Applies options per field
+ *
+ * Applies options per field.
+ *
  * @param options custom options for per state field
  *
  * ```typescript
@@ -363,8 +379,9 @@ export function options(options: StateOptions) {
 
 /**
  * Generator function
+ *
  * Generates a isolated set of decorators (state, options, unlock).
- * State defined with @state() can only be modified using @unlock()
+ * State defined with @state() can only be modified using @unlock().
  *
  * ```typescript
  * const {state,unlock} = locked();
@@ -482,7 +499,7 @@ function key() {
 }
 
 /**
- * thrown when accessing locked state from a locked
+ * Thrown when accessing locked state from a locked.
  */
 export class AccessError extends Error {
   constructor(name: string) {
@@ -491,12 +508,13 @@ export class AccessError extends Error {
 }
 
 /**
- * logs access to state vars
- * pass via options when declaring state
+ * Logs access to state vars.
+ *
+ * Pass via @options(log) when declaring state.
  *
  * ```typescript
  * class State {
- *   @state({...log}) myField = 'test';
+ *   @state({...log, ..more options.. }) myField = 'test';
  * }
  * ```
  */

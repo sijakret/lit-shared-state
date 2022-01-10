@@ -18,6 +18,10 @@ class State {
 }
 ```
 
+> **Note:** You should only use observers if you really need them.
+> If you need derived date, a side effect-free getter (i.e. computed value)
+> is always preferrable since it avoids deep state mutations stacks.
+
 ## Batching Mutations
 
 If you have a method that sets multiple parts of your state,
@@ -50,8 +54,10 @@ function modify() {
     myState.subState.propB *= 2;
 }
 ```
+If you only use state in `LitElement` components this is not a problem since they have built in deferred updating so your component will only render once even if you change multiple states that are used during rendering.
 
-In this case ```observer()``` will be invoked twice.
+In contrast, ```observers:[ .. ]``` wich are affected are invoked synchronously right when you mutate each part of the state.
+So in the case above ```observer()``` will be invoked twice.
 If you only want one invocation after all your state mutations have been executed you can use [transactions](api/modules.html#transaction).
 
 ```ts
