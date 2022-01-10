@@ -63,7 +63,9 @@ export function state<T extends { new (...args: any[]): any }>(
         const optional = __optionals.get(constructor.prototype);
         if (optional) {
           for (const propKey of optional) {
-            defineState(constructor, this, propKey, stateOptions);
+            if (!Object.getOwnPropertyDescriptor(this, propKey)) {
+              defineState(constructor, this, propKey, stateOptions);
+            }
           }
         }
         // make sure no new properties are added
