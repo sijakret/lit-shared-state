@@ -1,9 +1,13 @@
 {
   "name": "lit-shared-state",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Reactive shared state management for LitElement",
   "main": "dist/lit-shared-state.js",
   "module": "dist/lit-shared-state.js",
+  "repository": {
+    "url": "https://github.com/sijakret/lit-shared-state"
+  },
+  "homepage": "https://sijakret.github.io/lit-shared-state",
   "type": "module",
   "typings": "dist/lit-shared-state.d.ts",
   "scripts": {
