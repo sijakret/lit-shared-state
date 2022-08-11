@@ -64,7 +64,7 @@ class CompB extends LitElement {
   }
 }
 
-// manipulating state from anywhere wills
+// manipulating state from anywhere will
 // lead to update for all LitElements that depend on it
 globalState.reactiveState += 41;
 ```

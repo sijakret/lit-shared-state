@@ -121,3 +121,17 @@ playground-file-editor {
   border-radius: 9px;
   width: 100%;
 }
+
+@media (prefers-color-scheme: light) {
+  /* CSS Code wenn Dark Mode aktiv */
+  code.hljs {
+    color: rgb(90, 90, 90);
+  }
+  .hljs-subst {
+    color: rgb(120, 120, 120);
+  }
+
+  [github] {
+    fill: #434343;
+  }
+}
