@@ -2,9 +2,9 @@ name: Build
 
 on:
   push:
-    branches: [ main, next ]
+    branches: [main, next]
   pull_request:
-    branches: [ main, next]
+    branches: [main, next]
 
 jobs:
   build:
@@ -15,51 +15,52 @@ jobs:
         node-version: [16.x]
 
     steps:
-    #   # https://help.github.com/en/actions/reference/development-tools-for-github-actions#set-an-environment-variable-set-env
-    - name: Extract Branch Name
-      run: echo "BRANCH=$(echo ${GITHUB_REF##*/})" >> $GITHUB_ENV
-    - name: Set Release Mode (branch == main)
-      if: env.BRANCH == 'main'
-      run: echo "PUBLISH=true" >> $GITHUB_ENV
-    # - name: Set Release Mode (branch == next)
-    #   if: env.BRANCH == 'next'
-    #   run: |
-    #     echo "::set-env name=PUBLISH::true" 
-    #     echo "::set-env name=NEXT::true" 
-    - uses: actions/checkout@v2
-    # - name: Use Node.js ${{ matrix.node-version }}
-    #   uses: actions/setup-node@v1
-    #   with:
-    #     node-version: ${{ matrix.node-version }}
-    - run: npm ci
-    - run: npm run build
-    - run: npm test
-    - name: Coveralls GitHub Action
-      uses: coverallsapp/github-action@v1.0.1
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-      env:
-        CI: true
+      #   # https://help.github.com/en/actions/reference/development-tools-for-github-actions#set-an-environment-variable-set-env
+      - name: Extract Branch Name
+        run: echo "BRANCH=$(echo ${GITHUB_REF##*/})" >> $GITHUB_ENV
+      - name: Set Release Mode (branch == main)
+        if: env.BRANCH == 'main'
+        run: echo "PUBLISH=true" >> $GITHUB_ENV
+      # - name: Set Release Mode (branch == next)
+      #   if: env.BRANCH == 'next'
+      #   run: |
+      #     echo "::set-env name=PUBLISH::true"
+      #     echo "::set-env name=NEXT::true"
+      - uses: actions/checkout@v2
+      # - name: Use Node.js ${{ matrix.node-version }}
+      #   uses: actions/setup-node@v1
+      #   with:
+      #     node-version: ${{ matrix.node-version }}
+      - run: npm ci
+      - run: npm run build
+      - run: export NODE_OPTIONS=--no-experimental-fetch
+      - run: npm test
+      - name: Coveralls GitHub Action
+        uses: coverallsapp/github-action@v1.0.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          CI: true
 
-    # - run: npx semantic-release@17.0.7
-    #   env: # Or as an environment variable
-    #     NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #   if: env.PUBLISH == 'true'
-    #   # will do verythingbut publish! (we need the bumped version number)
-    - run: npm run doc:build
-    #  if: env.PUBLISH == 'true'
+      # - run: npx semantic-release@17.0.7
+      #   env: # Or as an environment variable
+      #     NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   if: env.PUBLISH == 'true'
+      #   # will do verythingbut publish! (we need the bumped version number)
+      - run: npm run doc:build
+      #  if: env.PUBLISH == 'true'
       # fallback
-    # - run: cp dist-doc/index.html dist-doc/404.html
-    #   if: ${{ env.PUBLISH == 'true' && !(env.NEXT == 'true') }}
-    #   # only on next
-    #- run: npm run build-doc&&cp dist-doc/next/index.html dist-doc/404.html
-    #  if: env.NEXT == 'true'
-    - name: Deploy Doc
-      if: env.PUBLISH == 'true'
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        target_branch: gh-pages
-        publish_dir: doc/dist
-        keep_files: true
+      # - run: cp dist-doc/index.html dist-doc/404.html
+      #   if: ${{ env.PUBLISH == 'true' && !(env.NEXT == 'true') }}
+      #   # only on next
+      #- run: npm run build-doc&&cp dist-doc/next/index.html dist-doc/404.html
+      #  if: env.NEXT == 'true'
+      - name: Deploy Doc
+        if: env.PUBLISH == 'true'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          target_branch: gh-pages
+          publish_dir: doc/dist
+          keep_files: true

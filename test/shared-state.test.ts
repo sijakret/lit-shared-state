@@ -1,5 +1,5 @@
 import { expect } from '@esm-bundle/chai';
-import { LitElement, html } from 'lit';
+import { LitElement, html, PropertyValues } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { fixture } from '@open-wc/testing';
 import {
@@ -271,6 +271,13 @@ it('basic update cycle with objects work', async () => {
   const el = (await fixture('<c-obj></c-obj>')) as LitElement;
   await el.updateComplete;
 
+  const updated = (el as any).updated;
+  let updatedArgs: PropertyValues;
+  (el as any).updated = function (props: PropertyValues) {
+    updatedArgs = props;
+    return updated(...arguments);
+  }.bind(el);
+
   expect(el.renderRoot.textContent).to.equal(`0:test`);
   myState.data = {
     array: [
@@ -278,7 +285,11 @@ it('basic update cycle with objects work', async () => {
       { id: 1, name: 'john' },
     ],
   };
+
   await el.updateComplete;
+  // make sure update() is called with a path to the changed data
+  expect(updatedArgs!.get('state.data')).to.equal(data);
+
   expect(el.renderRoot.textContent).to.equal(`0:jane1:john`);
   myState.data = {
     array: [

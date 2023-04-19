@@ -1,6 +1,6 @@
 {
   "name": "lit-shared-state",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "Reactive shared state management for LitElement",
   "main": "dist/lit-shared-state.js",
   "module": "dist/lit-shared-state.js",
