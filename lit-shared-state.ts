@@ -13,7 +13,7 @@ export interface StateOptions<T = any> {
    * Is allowed to set stateVar.value
    *
    * IMPORTANT: if you do NOT set stateVar.value you need to call
-   * stteVar.notifyObservers() to indicate data has updated.
+   * stateVar.notifyObservers() to indicate data has updated.
    */
   set?: (stateVar: StateVar<T>, value: T | undefined) => void;
   /**
@@ -149,7 +149,7 @@ export class StateVar<T = unknown> {
   ) {
     if (this.options.init) {
       this._value = this.options.init(this, _value);
-      options.notifyOnInit && this.notifyObservers();
+      options.notifyOnInit && this.notifyObservers(this.key, undefined);
     }
   }
 
@@ -157,17 +157,18 @@ export class StateVar<T = unknown> {
     return this._value;
   }
   set value(value: T | undefined) {
+    const old = this._value;
     this._value = value;
-    this.notifyObservers();
+    this.notifyObservers(this.key, old);
   }
 
   /**
    * notifies all LitElement observers and all explicitly passed observers
    */
-  notifyObservers() {
+  notifyObservers(name?: PropertyKey, oldValue?: unknown) {
     // litElements
     for (const observer of this.observers.keys()) {
-      observer.update();
+      observer.update(name, oldValue);
     }
     // custom observers
     for (const observer of this.options.observers) {
@@ -178,7 +179,7 @@ export class StateVar<T = unknown> {
     // parent states
     const parents = __parents.get(this.parent) as Ancestor[];
     for (const { parent } of parents) {
-      parent.notifyObservers();
+      parent.notifyObservers(name, oldValue);
     }
   }
 }
@@ -316,7 +317,8 @@ export function use() {
     return {
       set: function (state: any) {
         this[controllerSymbol] = new StateController(
-          this as unknown as ReactiveControllerHost
+          this as unknown as ReactiveControllerHost,
+          propertyKey
         );
         this[symbol] = state;
       },
@@ -463,14 +465,22 @@ function chainOptions(
  * Simplistic state controller that enqueus updates in an LitElement
  */
 class StateController implements ReactiveController {
-  constructor(private host: ReactiveControllerHost /*, state: StateVar*/) {
+  constructor(
+    private host: ReactiveControllerHost,
+    private propertyKey: string
+  ) {
     host.addController(this);
   }
-  update() {
+  update(name?: PropertyKey, oldValue?: unknown) {
     const poppedController = __currentController;
     // controller will be added as dep to all state vars that are accessed moving forward
     __currentController = this;
-    this.host.requestUpdate();
+    (
+      this.host.requestUpdate as (
+        name?: PropertyKey,
+        oldValue?: unknown
+      ) => unknown
+    )(`${this.propertyKey}.${String(name)}`, oldValue);
     this.host.updateComplete.then(() => {
       // pop from controller stack
       __currentController = poppedController;
