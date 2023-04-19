@@ -10580,7 +10580,7 @@ let CodeSample = class extends s$1 {
       files: __spreadValues$1(__spreadValues$1({}, this.files), staticFiles),
       dependencies: {
         lit: "^2.0.2",
-        "lit-shared-state": "0.2.0"
+        "lit-shared-state": "0.2.1"
       }
     }}
     >
@@ -10667,7 +10667,7 @@ class Doc extends s$1 {
     }, 300);
   }
   render() {
-    return p` <h1 id="top">lit-shared-state@${"0.2.0"}</h1>
+    return p` <h1 id="top">lit-shared-state@${"0.2.1"}</h1>
 
               <p>
                 This page contains a guide with live samples on how to use
@@ -10693,7 +10693,7 @@ class Nav extends s$1 {
   render() {
     return p` <div nav-header>
                 <a href="#top">Lit Shared State</a>
-                <div version>${"0.2.0"}</div>
+                <div version>${"0.2.1"}</div>
               </div>
               <br /><br />
               <ol type="I">

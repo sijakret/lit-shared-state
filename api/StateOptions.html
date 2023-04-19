@@ -30,7 +30,7 @@ or for individual properties via @options(options) decorator.</p>
 <ul class="tsd-hierarchy">
 <li><span class="target">StateOptions</span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/sijakret/lit-shared-state/blob/4893cff/src/lit-shared-state.ts#L8">src/lit-shared-state.ts:8</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/sijakret/lit-shared-state/blob/5b7b632/src/lit-shared-state.ts#L12">src/lit-shared-state.ts:12</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -69,7 +69,7 @@ method needs to return current value!</p>
 <h5><span class="tsd-kind-parameter">stateVar</span>: <a href="../classes/ReadonlyStateVar.html" class="tsd-signature-type tsd-kind-class">ReadonlyStateVar</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type tsd-kind-type-parameter">T</span></h4></li></ul></li></ul></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/sijakret/lit-shared-state/blob/4893cff/src/lit-shared-state.ts#L24">src/lit-shared-state.ts:24</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/sijakret/lit-shared-state/blob/5b7b632/src/lit-shared-state.ts#L28">src/lit-shared-state.ts:28</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="init" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>init</span><a href="#init" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">init</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">stateVar</span>, <span class="tsd-kind-parameter">value</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">)</span></div>
@@ -79,35 +79,35 @@ Method needs to return initial value value!</p>
 <h3>Param</h3><p>default initialization value</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/sijakret/lit-shared-state/blob/4893cff/src/lit-shared-state.ts#L30">src/lit-shared-state.ts:30</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/sijakret/lit-shared-state/blob/5b7b632/src/lit-shared-state.ts#L34">src/lit-shared-state.ts:34</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="lock" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>lock</span><a href="#lock" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">lock</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">Lock</span></div>
 <div class="tsd-comment tsd-typography"><p>Used internally to provide a lock for avariable.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/sijakret/lit-shared-state/blob/4893cff/src/lit-shared-state.ts#L42">src/lit-shared-state.ts:42</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/sijakret/lit-shared-state/blob/5b7b632/src/lit-shared-state.ts#L46">src/lit-shared-state.ts:46</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="noSeal" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>no<wbr/>Seal</span><a href="#noSeal" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">no<wbr/>Seal</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
 <div class="tsd-comment tsd-typography"><p>If true state objects will not be sealed automatically.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/sijakret/lit-shared-state/blob/4893cff/src/lit-shared-state.ts#L46">src/lit-shared-state.ts:46</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/sijakret/lit-shared-state/blob/5b7b632/src/lit-shared-state.ts#L50">src/lit-shared-state.ts:50</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="notifyOnInit" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>notify<wbr/>On<wbr/>Init</span><a href="#notifyOnInit" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">notify<wbr/>On<wbr/>Init</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
 <div class="tsd-comment tsd-typography"><p>If true observers will already be notified on init.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/sijakret/lit-shared-state/blob/4893cff/src/lit-shared-state.ts#L38">src/lit-shared-state.ts:38</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/sijakret/lit-shared-state/blob/5b7b632/src/lit-shared-state.ts#L42">src/lit-shared-state.ts:42</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="observers" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>observers</span><a href="#observers" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">observers</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">changed</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">[]</span></div>
 <div class="tsd-comment tsd-typography"><p>All observers will be called everytime the value of state var changes.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/sijakret/lit-shared-state/blob/4893cff/src/lit-shared-state.ts#L34">src/lit-shared-state.ts:34</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/sijakret/lit-shared-state/blob/5b7b632/src/lit-shared-state.ts#L38">src/lit-shared-state.ts:38</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="set" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>set</span><a href="#set" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">set</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">stateVar</span>, <span class="tsd-kind-parameter">value</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">)</span></div>
@@ -133,7 +133,7 @@ stateVar.notifyObservers() to indicate data has updated.</p>
 <h5><span class="tsd-kind-parameter">value</span>: <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type tsd-kind-type-parameter">T</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/sijakret/lit-shared-state/blob/4893cff/src/lit-shared-state.ts#L18">src/lit-shared-state.ts:18</a></li></ul></aside></section></section></div>
+<li>Defined in <a href="https://github.com/sijakret/lit-shared-state/blob/5b7b632/src/lit-shared-state.ts#L22">src/lit-shared-state.ts:22</a></li></ul></aside></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

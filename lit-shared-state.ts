@@ -1,4 +1,8 @@
-import { ReactiveController, ReactiveControllerHost } from 'lit';
+import {
+  PropertyDeclaration,
+  ReactiveController,
+  ReactiveControllerHost,
+} from 'lit';
 
 /**
  * Options for creating a state object.
@@ -165,10 +169,10 @@ export class StateVar<T = unknown> {
   /**
    * notifies all LitElement observers and all explicitly passed observers
    */
-  notifyObservers(name?: PropertyKey, oldValue?: unknown) {
+  notifyObservers(name: PropertyKey, oldValue: unknown) {
     // litElements
     for (const observer of this.observers.keys()) {
-      observer.update(name, oldValue);
+      observer.update(name, this._value, oldValue);
     }
     // custom observers
     for (const observer of this.options.observers) {
@@ -471,16 +475,21 @@ class StateController implements ReactiveController {
   ) {
     host.addController(this);
   }
-  update(name?: PropertyKey, oldValue?: unknown) {
+  update(name: PropertyKey, value: unknown, oldValue: unknown) {
     const poppedController = __currentController;
     // controller will be added as dep to all state vars that are accessed moving forward
     __currentController = this;
     (
       this.host.requestUpdate as (
         name?: PropertyKey,
-        oldValue?: unknown
+        oldValue?: unknown,
+        options?: PropertyDeclaration
       ) => unknown
-    )(`${this.propertyKey}.${String(name)}`, oldValue);
+    )(`${this.propertyKey}.${String(name)}`, oldValue, {
+      hasChanged: (_value: unknown, _oldValue: unknown) => {
+        return value !== oldValue && (oldValue === oldValue || value === value);
+      },
+    });
     this.host.updateComplete.then(() => {
       // pop from controller stack
       __currentController = poppedController;
