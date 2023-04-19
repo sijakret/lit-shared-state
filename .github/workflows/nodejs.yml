@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x]
+        node-version: [16.19.0]
 
     steps:
       #   # https://help.github.com/en/actions/reference/development-tools-for-github-actions#set-an-environment-variable-set-env
