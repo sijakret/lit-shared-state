@@ -249,7 +249,7 @@ it('basic update cycle with objects work', async () => {
   };
   @state()
   class State {
-    data: Data = data;
+    data?: Data = data;
     test() {}
   }
   const myState = new State();
@@ -279,18 +279,25 @@ it('basic update cycle with objects work', async () => {
   }.bind(el);
 
   expect(el.renderRoot.textContent).to.equal(`0:test`);
-  myState.data = {
+  const newData = (myState.data = {
     array: [
       { id: 0, name: 'jane' },
       { id: 1, name: 'john' },
     ],
-  };
+  });
 
   await el.updateComplete;
   // make sure update() is called with a path to the changed data
   expect(updatedArgs!.get('state.data')).to.equal(data);
 
   expect(el.renderRoot.textContent).to.equal(`0:jane1:john`);
+
+  myState.data = undefined;
+  await el.updateComplete;
+
+  // make sure update() is called with a path to the changed data
+  expect(updatedArgs!.get('state.data')).to.equal(newData);
+
   myState.data = {
     array: [
       { id: 0, name: 'jane' },
