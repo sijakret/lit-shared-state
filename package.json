@@ -32,7 +32,7 @@
     "@web/dev-server-esbuild": "^0.2.16",
     "@web/rollup-plugin-html": "^1.10.1",
     "@web/rollup-plugin-import-meta-assets": "^1.0.7",
-    "@web/test-runner": "^0.13.23",
+    "@web/test-runner": "^0.15.3",
     "highlight.js": "^11.3.1",
     "playground-elements": "^0.14.7",
     "rollup-plugin-copy": "^3.4.0",
